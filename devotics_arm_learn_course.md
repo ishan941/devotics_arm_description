@@ -1,884 +1,761 @@
-Devotics Robotic Arm Engineering Course
+# Devotics Robotic Arm — Agentic Engineering Course
+**Learning Mode: Agentic (AI pair-programmer active)**
+**Started:** September 2026 | **Target:** Devotics Arm V1 — fully integrated physical robot
 
-Final System
-The final architecture will look approximately like this:
-                    DEVOTICS ARM V1
-                    RViz / User
-                         │
-                         ↓
-                      MoveIt 2
-                         │
-                  Motion Planning
-                            ↓
-                Joint Trajectory
-                         │
-                         ↓
-                   ros2_control
-                         │
-                         ↓
-              Hardware Interface
-                         │
-                    USB Serial
-                         │
-                         ↓
-                       ESP32
-                         │
-                ┌────────┼────────┐
-                ↓        ↓        ↓
-             Drivers   Drivers   Drivers
-                ↓        ↓        ↓
-             J1 J2     J3 J4     J5 J6
-                         │
-                      Gripper
-The PC will calculate trajectories. The ESP32 should not calculate MoveIt paths or depend on Wi-Fi for precise motor timing. Its job will be lower-level control: motor commands, homing, limits, feedback and safety.
-For V1, we will use USB serial first because it is simpler and more reliable for a bench prototype than Wi-Fi. CAN/RS485 can be considered later.
+---
 
-Course Duration
-12 weeks
-5 learning/build days per week
-60 total days
-You have already completed:
-Day 1 ✅
-Day 2 ✅
-Most days:
-Theory              20–30 min
-Practical work      60–90 min
-Documentation       10–15 min
-────────────────────────────
-Total               ~1.5–2 hr
-Mechanical assembly/testing days may require 2–3 hours.
-Expected total effort is roughly 90–120 hours, depending mainly on mechanical debugging and hardware availability.
-
-PHASE 1 — ROS ROBOT FUNDAMENTALS
-Week 1 — From One Joint to a Real Arm Structure
-
-
-Day
-Topic
-Practical Work
-Result
-Day 1 
-ROS 2, RViz, MoveIt introduction
-Installed/verified tools
-Development environment ready
-Day 2 
-URDF, links, joints, TF
-Built 1-DOF arm
-First Devotics arm moves in RViz
-Day 3
-3-DOF arm
-Add base, shoulder and elbow
-3 joint sliders
-Day 4
-Joint axes & coordinate frames
-Experiment with X/Y/Z joint axes
-Understand why joints rotate differently
-Day 5
-TF tree
-Add TF display and inspect transforms
-Understand complete link/joint hierarchy
-
-Day 3
-Turn:
-Base
- │
-J1
- │
-Link
-into:
-        forearm
-            │
-           J3
-            │
-        upper_arm
-            │
-           J2
-            │
-        shoulder
-            │
-           J1
-            │
-          base
-You will get:
-joint1 slider
-joint2 slider
-joint3 slider
-and manually pose the arm in RViz.
-Day 4
-Learn exactly what:
-
-<axis xyz="1 0 0"/>
-
-<axis xyz="0 1 0"/>
-
-<axis xyz="0 0 1"/>
-means.
-You will deliberately change axes and watch what happens.
-This will teach you more than memorizing coordinate-system theory.
-Day 5
-Study:
-base_link
-    ↓
-shoulder_link
-    ↓
-upper_arm_link
-    ↓
-forearm_link
-and inspect:
-
-ros2 topic echo /tf
-Milestone:
-You understand how ROS represents the structure and current pose of a robotic arm.
-
-Week 2 — Build the Complete Virtual Devotics Arm
-Now we'll create the full kinematic structure before worrying about motors.
-
-Day
-Topic
-Practical Work
-Result
-Day 6
-Wrist joints
-Add J4 and J5
-5-DOF arm
-Day 7
-Wrist roll
-Add J6
-6-DOF arm
-Day 8
-Gripper
-Add gripper links/joint
-Complete virtual robot
-Day 9
-Xacro
-Convert URDF into reusable Xacro
-Cleaner robot description
-Day 10
-Joint limits & home pose
-Configure realistic limits
-Final V1 kinematic model
-
-Target structure:
-                gripper
-                    │
-                   J6
-                    │
-                 wrist
-                    │
-                   J5
-                    │
-                 wrist
-                    │
-                   J4
-                    │
-                forearm
-                    │
-                   J3
-                    │
-               upper arm
-                    │
-                   J2
-                    │
-                shoulder
-                    │
-                   J1
-                    │
-                  base
-A six-revolute-joint arm is a useful target because it can eventually control both end-effector position and orientation.
-We will still reserve the right to build 5 DOF + gripper physically if our cost/torque analysis later shows that a sixth joint gives little value for V1.
-That's a hardware decision, not something we should guess today.
-
-PHASE 2 — KINEMATICS AND MOVEIT
-Week 3 — Learn How an Arm Knows Where Its Hand Is
-
-
-Day
-Topic
-Practical Work
-Result
-Day 11
-Forward kinematics
-Change joint angles and observe XYZ
-Understand FK
-Day 12
-Inverse kinematics
-Concept + simple examples
-Understand IK
-Day 13
-End-effector frame
-Create tool/gripper frame
-Correct TCP
-Day 14
-Workspace
-Explore reachable positions
-Understand robot reach
-Day 15
-Singularity & unreachable poses
-Test problematic configurations
-Understand arm limitations
-
-You won't spend hours deriving matrices by hand.
-The objective is to understand:
-Forward Kinematics
-
-Joint angles
-    ↓
-θ1 θ2 θ3 θ4 θ5 θ6
-    ↓
-Where is gripper?
-    ↓
-X Y Z + orientation
-versus:
-Inverse Kinematics
-
-Desired gripper position
-       ↓
-     X Y Z
-       ↓
-What joint angles?
-       ↓
-θ1 θ2 θ3 θ4 θ5 θ6
-That distinction is fundamental to MoveIt.
-
-Week 4 — MoveIt 2
-This is where the arm becomes much more intelligent.
-MoveIt's Setup Assistant takes a URDF and generates additional configuration such as planning groups, end effectors, kinematics information and collision configuration.
-
-Day
-Topic
-Practical Work
-Result
-Day 16
-MoveIt demo
-Use an existing robot in MoveIt
-Understand Plan/Execute
-Day 17
-Setup Assistant
-Import Devotics URDF/Xacro
-Start MoveIt configuration
-Day 18
-Planning groups
-Configure devotics_arm and gripper
-MoveIt understands arm
-Day 19
-End effector + poses
-Home, ready, pickup poses
-Named robot states
-Day 20
-Motion planning
-Plan targets in RViz
-Devotics arm plans motion
-
-MoveIt's RViz plugin lets you create target poses, calculate trajectories and inspect the planned path before execution.
-By Day 20:
-Drag gripper target
-        ↓
-      MoveIt
-        ↓
-     IK solver
-        ↓
-Collision checking
-        ↓
-Path planning
-        ↓
-      PLAN
-        ↓
-Virtual Devotics Arm moves
-Stage Gate 1
-We do not purchase complete arm hardware unless this works:
-Devotics arm appears correctly in MoveIt and can plan to multiple reachable poses.
-
-PHASE 3 — ROBOT CONTROL
-Week 5 — ros2_control
-Now you learn the layer between MoveIt and real motors.
-ros2_control manages controllers and hardware interfaces. Its joint_trajectory_controller executes timed joint-space trajectories containing position and optionally velocity/acceleration targets.
-
-Day
-Topic
-Practical Work
-Result
-Day 21
-ros2_control concepts
-Controller Manager, interfaces
-Understand control stack
-Day 22
-URDF control tags
-Add <ros2_control>
-Arm becomes controllable
-Day 23
-Joint State Broadcaster
-Configure state feedback
-Joint states via controller
-Day 24
-Joint Trajectory Controller
-Configure six joints
-Trajectory execution
-Day 25
-MoveIt → ros2_control
-Plan & Execute
-Full software pipeline
-
-Architecture becomes:
-MoveIt
-   ↓
-FollowJointTrajectory
-   ↓
-JointTrajectoryController
-   ↓
-ros2_control
-   ↓
-Mock Hardware
-   ↓
-Joint States
-   ↓
-RViz
-MoveIt expects trajectory controllers capable of accepting planned trajectories; the Setup Assistant can configure these interfaces.
-Milestone:
-MoveIt no longer simply animates the arm. It sends trajectories through the same controller structure we can later connect to hardware.
-
-PHASE 4 — PHYSICS SIMULATION
-Week 6 — Gazebo Harmonic
-ROS 2 Jazzy's recommended Gazebo pairing is Gazebo Harmonic, and ROS-Gazebo bridges allow ROS topics and simulated systems to communicate.
-
-Day
-Topic
-Practical Work
-Result
-Day 26
-Gazebo installation
-Install Jazzy-compatible Gazebo
-Simulator runs
-Day 27
-Spawn robot
-Devotics arm inside world
-3D simulated robot
-Day 28
-Mass & inertia
-Add physical properties
-Robot affected by physics
-Day 29
-Controllers
-Move joints in Gazebo
-Controlled simulated arm
-Day 30
-Object interaction
-Add table + cube
-Simulation test environment
-
-You will learn the difference between:
-RViz
-"Where ROS believes the arm is"
-and:
-Gazebo
-"What happens to the modeled arm under physics"
-Day 30 world:
-┌──────────────────────────────┐
-│                              │
-│             🟥               │
-│           object             │
-│      ─────────────           │
-│          table               │
-│                              │
-│   🤖 Devotics Arm            │
-│                              │
-└──────────────────────────────┘
-ARM64 rule
-We'll give Gazebo a fixed troubleshooting budget.
-If your ARM64 VM becomes the main problem instead of robotics learning:
-Gazebo → temporarily pause
-
-RViz + MoveIt + Mock ros2_control → continue
-We won't lose a week fighting simulation infrastructure.
-
-PHASE 5 — ENGINEER THE REAL ARM
-Week 7 — Mechanical Design Before Buying Motors
-This is where many hobby robotic-arm projects make the biggest mistake:
-Motor first → design later.
-We'll do the opposite.
-
-Day
-Topic
-Practical Work
-Result
-Day 31
-Requirements
-Define reach, use case, payload target
-Engineering specification
-Day 32
-Arm geometry
-Determine link lengths
-Mechanical architecture
-Day 33
-Torque calculation
-Calculate required joint torque
-Motor requirements
-Day 34
-Transmission design
-Gear/belt/direct drive comparison
-Reduction strategy
-Day 35
-BOM and costing
-Motors, drivers, bearings, PSU etc.
-Purchase decision
-
-Day 31 — Requirements
-We decide things such as:
-Desktop or floor mounted?
-Maximum reach?
-Target payload?
-Desired speed?
-Position accuracy?
-Gripper size?
-Total arm weight?
-Continuous or occasional use?
-We will not invent these specifications.
-
-Day 33 — Torque
-For example, shoulder torque depends approximately on:
-Torque = Force × Distance
-But we also need:
-forearm mass
-wrist mass
-gripper mass
-payload
-link length
-acceleration
-gear ratio
-safety margin
-That calculation determines whether we need:
-servo
-stepper
-geared stepper
-BLDC
-closed-loop stepper
-rather than choosing motors because they look popular.
-
-Stage Gate 2 — Hardware Purchase
-Only on or after approximately Day 35 do we approve a BOM.
-Before buying, we calculate:
-motor cost
-driver cost
-bearings
-shafts
-belts
-pulleys
-fasteners
-power supply
-wiring
-connectors
-filament
-limit switches
-encoders if required
-replacement/spares
-And compare:
-Complete prototype cost
-vs
-Learning value
-vs
-Expected reuse
-
-PHASE 6 — BUILD ONE REAL JOINT
-Week 8 — Physical Joint Prototype
-We will not print the entire arm yet.
-We'll build one demanding joint first, probably the shoulder.
-
-Day
-Topic
-Practical Work
-Result
-Day 36
-Print mechanical prototype
-Joint housing/link
-Mechanical joint
-Day 37
-Motor + driver
-Bench-test actuator
-Reliable rotation
-Day 38
-Homing
-Install limit/home switch
-Known zero position
-Day 39
-ESP32 control
-Angle/steps commands
-Low-level controller
-Day 40
-ROS → ESP32
-Command joint from ROS 2
-First physical ROS joint
-
-Architecture:
-ROS 2
- ↓
-command: 45°
- ↓
-USB serial
- ↓
-ESP32
- ↓
-motor driver
- ↓
-motor
- ↓
-gear/belt
- ↓
-physical joint
-Very important
-The microcontroller will handle:
-step timing
-motor direction
-homing
-limit switches
-emergency behavior
-ROS won't generate each motor pulse remotely.
-
-Week 9 — Validate the Joint Before Scaling
-
-Day
-Topic
-Practical Work
-Result
-Day 41
-Calibration
-Compare requested/actual angle
-Joint mapping
-Day 42
-Backlash
-Direction-change testing
-Backlash measured
-Day 43
-Thermal testing
-Run repeated movement
-Motor/driver validated
-Day 44
-Load testing
-Increase controlled load
-Real capability measured
-Day 45
-Design revision
-Fix mechanical/electrical issues
-Joint V2 approved
-
-Test:
-Command      Actual
-
-0°     →     ?
-30°    →     ?
-60°    →     ?
-90°    →     ?
-60°    →     ?
-30°    →     ?
-0°     →     ?
-This exposes:
-backlash
-missed steps
-gear slippage
-flex
-calibration errors
-Stage Gate 3
-We don't build five more bad joints.
-Only proceed if this one joint proves:
-repeatable motion
-acceptable temperature
-sufficient torque
-reliable homing
-mechanical rigidity
-
-PHASE 7 — BUILD THE PHYSICAL ARM
-Week 10 — Base, Shoulder and Elbow
-
-
-Day
-Topic
-Practical Work
-Result
-Day 46
-Base joint
-Print/assemble J1
-Base rotation
-Day 47
-Shoulder
-Assemble J2
-Main lifting joint
-Day 48
-Elbow
-Assemble J3
-3-axis structure
-Day 49
-Electronics
-Connect three actuators
-3-joint controller
-Day 50
-ROS control
-Control J1–J3 together
-Half-arm works
-
-Now we have:
-     elbow
-        ● J3
-       /
-      /
-     ● J2
-     │
-     │
-     ● J1
-   ███████
-     BASE
-This will be a significant milestone.
-
-Week 11 — Wrist + Gripper + Complete Mechanics
-
-
-Day
-Topic
-Practical Work
-Result
-Day 51
-Wrist design
-J4 assembly
-Wrist pitch
-Day 52
-Wrist orientation
-J5/J6 assembly
-Full orientation capability
-Day 53
-Gripper
-Print + actuate gripper
-End effector
-Day 54
-Cable management
-Route power/signals safely
-Reliable wiring
-Day 55
-Manual joint test
-Move every joint individually
-Complete physical arm
-
-At Day 55:
-           ┌──┐
-            │  │ gripper
-             \/
-              │
-            ● J6
-              │
-            ● J5
-              │
-            ● J4
-             /
-            /
-          ● J3
-         /
-        /
-      ● J2
-      │
-      │
-      ● J1
-   ──────────
-       BASE
-This is when we can legitimately call it a physical robotic arm.
-But it still won't be finished.
-A robot that moves manually is not yet an integrated robotics system.
-
-PHASE 8 — CONNECT MOVEIT TO THE REAL ARM
-Week 12 — Final Integration
-
-
-Day
-Topic
-Practical Work
-Result
-Day 56
-Hardware interface
-Connect ros2_control to ESP32
-ROS sees real joints
-Day 57
-Joint calibration
-Establish zero offsets and limits
-URDF matches reality
-Day 58
-MoveIt execution
-Plan & execute on real robot
-Automated movement
-Day 59
-Pick-and-place
-Pick known cube position
-Functional manipulation
-Day 60
-Validation & documentation
-Full test + final documentation
-Devotics Arm V1 complete
-
-The final pipeline:
-               RViz
-                  │
-            Choose Target
+## Final System Architecture
+```
+             RViz / User
                   │
                   ↓
-               MoveIt
-                  │
-        Inverse Kinematics
+               MoveIt 2
                   │
           Motion Planning
+                  ↓
+         Joint Trajectory
                   │
                   ↓
-        Joint Trajectory
-                  │
-                  ↓
-       JointTrajectoryController
-                  │
-                  ↓
-          ros2_control
+            ros2_control
                   │
                   ↓
        Devotics Hardware Interface
                   │
-                  ↓
-             USB Serial
+              USB Serial
                   │
                   ↓
                 ESP32
                   │
-                  ↓
-          Motor Controllers
+       ┌──────────┼──────────┐
+       ↓          ↓          ↓
+    Drivers    Drivers    Drivers
+       ↓          ↓          ↓
+    J1  J2     J3  J4     J5  J6
                   │
-                  ↓
-          PHYSICAL ARM 🤖
-The ros2_control Controller Manager is specifically designed to sit between ROS controllers and hardware interfaces.
+               Gripper
+```
 
-Final Test — No AI Yet
-The first final demonstration should be deliberately simple.
-Place a cube at a known position:
-                  🟥
-                   cube
-             ─────────────
-                 table
+**PC calculates trajectories. ESP32 handles low-level control: step timing, homing, limits, feedback, safety.**
+**V1 uses USB Serial first — simpler and more reliable than Wi-Fi for a bench prototype.**
 
+---
 
-        🤖
-Sequence:
-HOME
- ↓
-Move above cube
- ↓
-Open gripper
- ↓
-Move downward
- ↓
-Close gripper
- ↓
-Lift cube
- ↓
-Move to destination
- ↓
-Lower
- ↓
-Open gripper
- ↓
-Return HOME
-If this works repeatedly, Devotics Arm V1 is complete.
-Not because it looks cool, but because the full engineering stack works.
+## How Agentic Learning Works
 
-What Counts as “Complete”
-I would not call the project complete merely because the arm moves.
-The final acceptance criteria are:
+> **Old way:** Read theory → try to build → get stuck → search → repeat.
+> **Agentic way:** Build immediately → AI explains in context → verify with a real test → push to git → next day.
 
-Requirement
-Required
-URDF/Xacro model
-✅
-RViz visualization
-✅
-Correct TF tree
-✅
-MoveIt configuration
-✅
-Motion planning
-✅
-ros2_control
-✅
-Physical arm
-✅
-Homing
-✅
-Joint limits
-✅
-Gripper
-✅
-Real joint calibration
-✅
-MoveIt → real arm
-✅
-Emergency stop / safe shutdown
-✅
-Known-position pick & place
-✅
-BOM
-✅
-Wiring diagram
-✅
-CAD/STL files
-✅
-Software repository
-✅
-Assembly documentation
-✅
-Test results
-✅
+### Rules
+- Every day ends with a **concrete file in your repo** and a **pass/fail test** you can run
+- **No day is "reading only"** — every day you write or modify real ROS2 code
+- Paste errors directly to the AI — don't spend more than 5 minutes stuck alone
+- **Commit every day**: `git add -A && git commit -m "Day X: <what you built>"`
+- Days can be compressed: if you finish early, ask "what's next?" and keep going
 
-That is a real engineering prototype.
+---
 
-After V1 — Optional Phase
-Only after the arm works reliably should we add vision.
-Week 13 — Camera
-camera
- ↓
-ROS image
- ↓
-OpenCV
- ↓
-detect cube
-Week 14 — Coordinate Transformation
-Camera coordinates
-       ↓
-Calibration
-       ↓
-TF transformation
-       ↓
-Robot coordinates
-Then:
-Camera sees cube
-       ↓
-Determine X,Y,Z
-       ↓
-MoveIt
-       ↓
-Arm automatically picks cube
-Only later:
-YOLO
-AI grasp detection
-object classification
-voice commands
-reinforcement learning
-robotic hand
-I specifically would not add AI before Day 60. It would increase complexity without fixing the basic manipulation problem.
+## Progress Tracker
 
-Spending Plan
-This course has intentional purchasing gates:
-Days 1–30
-NPR 0 additional robotic-arm hardware
-Software + simulation
+| Phase | Days | Status |
+|-------|------|--------|
+| PHASE 1 — ROS Fundamentals (URDF + TF) | 1–10 | 🔄 Day 5 next |
+| PHASE 2 — Kinematics + MoveIt | 11–20 | ⬜ |
+| PHASE 3 — ros2_control | 21–25 | ⬜ |
+| PHASE 4 — Gazebo Simulation | 26–30 | ⬜ (ARM64 budget rule applies) |
+| PHASE 5 — Mechanical Engineering | 31–35 | ⬜ |
+| PHASE 6 — Physical Joint Prototype | 36–45 | ⬜ |
+| PHASE 7 — Build Full Physical Arm | 46–55 | ⬜ |
+| PHASE 8 — MoveIt → Real Arm Integration | 56–60 | ⬜ |
 
-Day 31–35
-Engineering calculations + BOM
+---
 
-Days 36–45
-Buy hardware for ONE joint only
+## PHASE 1 — ROS FUNDAMENTALS: URDF + TF
 
-If one joint passes
-        ↓
-Buy remaining arm hardware
+### Completed Work
 
-If one joint fails
-        ↓
-Fix design before spending more
+| Day | Topic | Deliverable | Status |
+|-----|-------|-------------|--------|
+| 1 | ROS2 install, RViz, tools | Dev environment ready | ✅ |
+| 2 | URDF, links, joints, TF | `devotics_arm_day2_backup.urdf` — 1-DOF arm | ✅ |
+| 3 | 3-DOF arm (base→shoulder→elbow) | `devotics_arm.urdf` — 3 joint sliders | ✅ |
+| 4 | Joint axes (X/Y/Z experiments) | Understood why `axis xyz` changes rotation direction | ✅ |
 
+---
+
+### DAY 5 — TF Tree: Understanding Your Arm's Spatial Identity
+**Goal:** Inspect the live TF tree of your 3-DOF arm and understand exactly how ROS tracks every link in space.
+
+**What you will learn:** How `robot_state_publisher` broadcasts transforms. How `joint_state_publisher_gui` drives them. How to read a TF tree.
+
+#### Step 1 — Launch your arm
+```bash
+cd ~/ros2_ws
+colcon build --packages-select devotics_arm_description
+source install/setup.bash
+ros2 launch devotics_arm_description display.launch.py
+```
+RViz should open with your 3-DOF arm and 3 joint sliders.
+
+#### Step 2 — Inspect the live TF topic
+Open a second terminal:
+```bash
+source ~/ros2_ws/install/setup.bash
+ros2 topic echo /tf
+```
+Move a slider. Watch the transform numbers change in real time.
+**What you see:** `translation` (x,y,z) + `rotation` (quaternion) for each joint frame.
+
+#### Step 3 — See the full static TF
+```bash
+ros2 topic echo /tf_static
+```
+These are the fixed transforms (joints at zero position).
+
+#### Step 4 — View the TF tree as a graph
+```bash
+ros2 run tf2_tools view_frames
+xdg-open frames.pdf
+```
+You should see:
+```
+base_link
+    └── shoulder_link   (joint1 — Z axis rotation)
+            └── upper_arm_link  (joint2 — Y axis rotation)
+                    └── forearm_link    (joint3 — Y axis rotation)
+```
+
+#### Step 5 — Query a specific transform live
+```bash
+ros2 run tf2_ros tf2_echo base_link forearm_link
+```
+Move joint sliders. Watch the transform from base to forearm tip update.
+**This is the essence of forward kinematics** — joint angles → end-effector position.
+
+#### Step 6 — See all active nodes and topics
+```bash
+ros2 node list
+ros2 topic list
+ros2 topic info /joint_states
+```
+
+#### ✅ Day 5 Pass Test
+Run this and confirm values change when you move sliders:
+```bash
+ros2 run tf2_ros tf2_echo base_link forearm_link
+```
+You should see XYZ translation values that are **not zero** when joints are moved.
+
+**Commit:**
+```bash
+cd ~/ros2_ws/src/devotics_arm_description
+git add -A && git commit -m "Day 5: TF tree inspected, understood link/joint hierarchy"
+```
+
+---
+
+### DAY 6 — Wrist Joints: J4 and J5 (5-DOF)
+**Goal:** Extend your arm from 3 joints to 5 by adding wrist pitch (J4) and wrist roll (J5).
+
+Add after the forearm_link and joint3 block in `urdf/devotics_arm.urdf`:
+
+```xml
+    <!-- WRIST LINK 1 -->
+    <link name="wrist1_link">
+        <visual>
+            <origin xyz="0 0 0.05" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="0.04" length="0.10"/>
+            </geometry>
+            <material name="wrist1_color">
+                <color rgba="0.85 0.50 0.10 1"/>
+            </material>
+        </visual>
+    </link>
+
+    <!-- JOINT 4 - WRIST PITCH -->
+    <joint name="joint4" type="revolute">
+        <parent link="forearm_link"/>
+        <child link="wrist1_link"/>
+        <origin xyz="0 0 0.25" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-1.57" upper="1.57" effort="10" velocity="1.0"/>
+    </joint>
+
+    <!-- WRIST LINK 2 -->
+    <link name="wrist2_link">
+        <visual>
+            <origin xyz="0 0 0.05" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="0.035" length="0.10"/>
+            </geometry>
+            <material name="wrist2_color">
+                <color rgba="0.90 0.70 0.10 1"/>
+            </material>
+        </visual>
+    </link>
+
+    <!-- JOINT 5 - WRIST ROLL -->
+    <joint name="joint5" type="revolute">
+        <parent link="wrist1_link"/>
+        <child link="wrist2_link"/>
+        <origin xyz="0 0 0.10" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="-3.14" upper="3.14" effort="10" velocity="1.5"/>
+    </joint>
+```
+
+#### ✅ Day 6 Pass Test
+```bash
+colcon build --packages-select devotics_arm_description && source install/setup.bash
+ros2 launch devotics_arm_description display.launch.py
+```
+You should see **5 joint sliders** in the joint_state_publisher_gui window.
+
+**Commit:** `git add -A && git commit -m "Day 6: Added J4 (wrist pitch) and J5 (wrist roll) — 5-DOF arm"`
+
+---
+
+### DAY 7 — Wrist Roll J6: 6-DOF Arm Complete
+**Goal:** Add the 6th degree of freedom (wrist yaw). Your arm now has the same kinematic structure as industrial robots.
+
+Add after joint5 in `urdf/devotics_arm.urdf`:
+
+```xml
+    <!-- WRIST LINK 3 (tool flange) -->
+    <link name="wrist3_link">
+        <visual>
+            <origin xyz="0 0 0.03" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="0.03" length="0.06"/>
+            </geometry>
+            <material name="wrist3_color">
+                <color rgba="0.95 0.90 0.10 1"/>
+            </material>
+        </visual>
+    </link>
+
+    <!-- JOINT 6 - WRIST YAW (tool rotation) -->
+    <joint name="joint6" type="revolute">
+        <parent link="wrist2_link"/>
+        <child link="wrist3_link"/>
+        <origin xyz="0 0 0.10" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-3.14" upper="3.14" effort="5" velocity="2.0"/>
+    </joint>
+```
+
+#### ✅ Day 7 Pass Test
+6 sliders visible. Run TF and count 7 frames (base + 6 links):
+```bash
+ros2 run tf2_tools view_frames && xdg-open frames.pdf
+```
+
+**Commit:** `git add -A && git commit -m "Day 7: Added J6 (wrist yaw) — full 6-DOF kinematic chain"`
+
+---
+
+### DAY 8 — Gripper: The End Effector
+**Goal:** Add a parallel gripper with prismatic (sliding) finger joints.
+
+Add after joint6 in `urdf/devotics_arm.urdf`:
+
+```xml
+    <!-- GRIPPER BASE LINK -->
+    <link name="gripper_base_link">
+        <visual>
+            <origin xyz="0 0 0.02" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.08 0.04 0.04"/>
+            </geometry>
+            <material name="gripper_base_color">
+                <color rgba="0.20 0.20 0.20 1"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="gripper_base_joint" type="fixed">
+        <parent link="wrist3_link"/>
+        <child link="gripper_base_link"/>
+        <origin xyz="0 0 0.06" rpy="0 0 0"/>
+    </joint>
+
+    <!-- LEFT FINGER -->
+    <link name="left_finger_link">
+        <visual>
+            <origin xyz="0 0.02 0.03" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.02 0.02 0.06"/>
+            </geometry>
+            <material name="finger_color">
+                <color rgba="0.60 0.60 0.60 1"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="left_finger_joint" type="prismatic">
+        <parent link="gripper_base_link"/>
+        <child link="left_finger_link"/>
+        <origin xyz="0 0 0.02" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="0.0" upper="0.04" effort="5" velocity="0.1"/>
+    </joint>
+
+    <!-- RIGHT FINGER -->
+    <link name="right_finger_link">
+        <visual>
+            <origin xyz="0 -0.02 0.03" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.02 0.02 0.06"/>
+            </geometry>
+            <material name="finger_color">
+                <color rgba="0.60 0.60 0.60 1"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="right_finger_joint" type="prismatic">
+        <parent link="gripper_base_link"/>
+        <child link="right_finger_link"/>
+        <origin xyz="0 0 0.02" rpy="0 0 0"/>
+        <axis xyz="0 -1 0"/>
+        <limit lower="0.0" upper="0.04" effort="5" velocity="0.1"/>
+    </joint>
+```
+
+#### ✅ Day 8 Pass Test
+**8 sliders** (6 revolute + 2 prismatic fingers). Move the finger sliders — fingers open and close.
+
+**Commit:** `git add -A && git commit -m "Day 8: Added parallel gripper with prismatic finger joints"`
+
+---
+
+### DAY 9 — Xacro: Convert URDF to Reusable Macros
+**Goal:** Convert `devotics_arm.urdf` into `devotics_arm.urdf.xacro`.
+
+#### Step 1 — Install Xacro (if needed)
+```bash
+sudo apt install ros-jazzy-xacro
+```
+
+#### Step 2 — Create `urdf/devotics_arm.urdf.xacro`
+
+Header:
+```xml
+<?xml version="1.0"?>
+<robot name="devotics_arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- PROPERTIES — edit here once, used everywhere -->
+    <xacro:property name="base_radius"   value="0.10"/>
+    <xacro:property name="base_height"   value="0.10"/>
+    <xacro:property name="upper_arm_len" value="0.30"/>
+    <xacro:property name="forearm_len"   value="0.25"/>
+    <xacro:property name="pi"            value="3.14159"/>
+
+    <!-- ... paste all links/joints using ${upper_arm_len} etc. ... -->
+
+</robot>
+```
+
+#### Step 3 — Update launch file to use xacro
+Edit `launch/display.launch.py` — replace the file.read() block:
+```python
+import xacro
+
+robot_description_doc = xacro.process_file(
+    os.path.join(package_path, 'urdf', 'devotics_arm.urdf.xacro')
+)
+robot_description = robot_description_doc.toxml()
+```
+
+#### Step 4 — Test xacro
+```bash
+ros2 run xacro xacro urdf/devotics_arm.urdf.xacro
+```
+No errors = working Xacro.
+
+#### ✅ Day 9 Pass Test
+```bash
+colcon build --packages-select devotics_arm_description && source install/setup.bash
+ros2 launch devotics_arm_description display.launch.py
+```
+Arm appears exactly as before.
+
+**Commit:** `git add -A && git commit -m "Day 9: Converted URDF to Xacro with properties"`
+
+---
+
+### DAY 10 — Joint Limits, Home Pose, Final Kinematic Model
+**Goal:** Set realistic joint limits and define named poses in YAML.
+
+#### Step 1 — Realistic limits (add as Xacro properties)
+```xml
+<xacro:property name="j1_lower" value="-3.14"/>   <!-- Base: full rotation -->
+<xacro:property name="j1_upper" value="3.14"/>
+<xacro:property name="j2_lower" value="-1.57"/>   <!-- Shoulder: +/-90deg -->
+<xacro:property name="j2_upper" value="1.57"/>
+<xacro:property name="j3_lower" value="-2.09"/>   <!-- Elbow: -120 to +120deg -->
+<xacro:property name="j3_upper" value="2.09"/>
+<xacro:property name="j4_lower" value="-1.57"/>
+<xacro:property name="j4_upper" value="1.57"/>
+<xacro:property name="j5_lower" value="-3.14"/>
+<xacro:property name="j5_upper" value="3.14"/>
+<xacro:property name="j6_lower" value="-3.14"/>
+<xacro:property name="j6_upper" value="3.14"/>
+```
+
+#### Step 2 — Create `config/joint_poses.yaml`
+```yaml
+home:
+  joint1: 0.0
+  joint2: 0.0
+  joint3: 0.0
+  joint4: 0.0
+  joint5: 0.0
+  joint6: 0.0
+
+ready:
+  joint1: 0.0
+  joint2: -0.5
+  joint3: 0.8
+  joint4: 0.0
+  joint5: 0.0
+  joint6: 0.0
+
+pickup_approach:
+  joint1: 0.0
+  joint2: -1.0
+  joint3: 1.4
+  joint4: -0.4
+  joint5: 0.0
+  joint6: 0.0
+```
+
+#### ✅ Day 10 Pass Test — Stage Gate 1
+```bash
+ros2 run xacro xacro urdf/devotics_arm.urdf.xacro | grep "joint name"
+```
+All 9 joints appear: joint1-6 + gripper_base_joint + left/right_finger_joint.
+
+**Commit:** `git add -A && git commit -m "Day 10: Joint limits set, named poses defined — complete virtual arm V1"`
+
+**STAGE GATE 1 COMPLETE: Full 6-DOF + gripper virtual arm ready for MoveIt**
+
+---
+
+## PHASE 2 — KINEMATICS + MOVEIT 2
+### Days 11–20
+
+| Day | Topic | Key Command/Deliverable |
+|-----|-------|------------------------|
+| 11 | Forward Kinematics intuition | `tf2_echo base_link wrist3_link` while moving joints |
+| 12 | Inverse Kinematics concept | Read MoveIt IK docs + test moveit_commander in Python |
+| 13 | End-effector frame | Add `tool0` link at gripper tip as fixed child of `wrist3_link` |
+| 14 | Workspace analysis | Use MoveIt RViz: drag target, find reachable envelope |
+| 15 | Singularity testing | Identify arm-straight and wrist-lock configurations |
+| 16 | MoveIt demo (demo robot) | `ros2 launch moveit_resources_panda_moveit_config demo.launch.py` |
+| 17 | MoveIt Setup Assistant | Import devotics Xacro, start config generation |
+| 18 | Planning groups | Configure `devotics_arm` (joints 1-6) + `gripper` group |
+| 19 | End effector + named poses | Set home/ready/pickup in Setup Assistant |
+| 20 | First motion plan | Plan to multiple poses, Execute in RViz |
+
+#### Day 16 Quick Start:
+```bash
+sudo apt install ros-jazzy-moveit
+ros2 launch moveit_resources_panda_moveit_config demo.launch.py
+```
+
+#### Day 17 Setup Assistant:
+```bash
+ros2 launch moveit_setup_assistant setup_assistant.launch.py
+```
+Load your `devotics_arm.urdf.xacro` → follow wizard → save config to:
+`~/ros2_ws/src/devotics_arm_moveit_config/`
+
+#### ✅ Phase 2 Gate Test (Day 20):
+In RViz MoveIt plugin:
+1. Drag interactive marker to a target pose
+2. Click Plan
+3. Click Execute
+4. Virtual arm moves along planned trajectory — no errors
+
+---
+
+## PHASE 3 — ROS2_CONTROL
+### Days 21–25
+
+| Day | Topic | Key File/Command |
+|-----|-------|-----------------|
+| 21 | Controller Manager, hardware interfaces | Read ros2_control architecture |
+| 22 | Add ros2_control block to Xacro | `urdf/devotics_arm.urdf.xacro` |
+| 23 | Joint State Broadcaster | `config/controllers.yaml` |
+| 24 | Joint Trajectory Controller | Add to controllers.yaml, test with `ros2 topic pub` |
+| 25 | MoveIt → ros2_control pipeline | Full Plan + Execute through controller |
+
+#### Day 22 — ros2_control block to add to Xacro:
+```xml
+<ros2_control name="devotics_arm_hardware" type="system">
+    <hardware>
+        <plugin>mock_components/GenericSystem</plugin>
+    </hardware>
+    <joint name="joint1">
+        <command_interface name="position"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+    </joint>
+    <!-- Repeat for joint2 through joint6 -->
+</ros2_control>
+```
+
+#### Day 23 — `config/controllers.yaml`:
+```yaml
+controller_manager:
+  ros__parameters:
+    update_rate: 100
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    joint_trajectory_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+joint_trajectory_controller:
+  ros__parameters:
+    joints:
+      - joint1
+      - joint2
+      - joint3
+      - joint4
+      - joint5
+      - joint6
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+```
+
+#### ✅ Phase 3 Gate Test (Day 25):
+```bash
+ros2 control list_controllers
+```
+Expected:
+```
+joint_state_broadcaster[...] active
+joint_trajectory_controller[...] active
+```
+MoveIt Plan+Execute works through the controller.
+
+---
+
+## PHASE 4 — GAZEBO SIMULATION
+### Days 26–30
+
+> ARM64 Rule: If Gazebo becomes the main blocker, skip to Phase 5. Return later.
+
+| Day | Topic | Deliverable |
+|-----|-------|-------------|
+| 26 | Install Gazebo Harmonic | `gz sim --version` works |
+| 27 | Spawn Devotics arm in Gazebo | Robot appears in 3D world |
+| 28 | Mass + inertia tags | Physics-correct URDF |
+| 29 | ROS-Gazebo bridge + controllers | Joint commands work in sim |
+| 30 | Table + cube world | Pick-and-place test environment |
+
+#### Day 26 Install:
+```bash
+sudo apt install ros-jazzy-ros-gz
+gz sim --version
+```
+
+#### Day 28 — Inertia macro (add to Xacro):
+```xml
+<xacro:macro name="cylinder_inertia" params="mass radius length">
+    <inertial>
+        <mass value="${mass}"/>
+        <inertia
+            ixx="${mass*(3*radius*radius + length*length)/12}"
+            iyy="${mass*(3*radius*radius + length*length)/12}"
+            izz="${mass*radius*radius/2}"
+            ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+</xacro:macro>
+```
+
+---
+
+## PHASE 5 — MECHANICAL ENGINEERING
+### Days 31–35: Engineer Before Buying
+
+| Day | Topic | Deliverable |
+|-----|-------|-------------|
+| 31 | Requirements specification | `docs/arm_requirements.md` |
+| 32 | Link lengths + geometry | `docs/arm_geometry.md` + sketch |
+| 33 | Torque calculations | `docs/torque_analysis.md` with numbers |
+| 34 | Transmission design | Gear ratio decision per joint |
+| 35 | BOM + costing | `docs/bom.md` — hardware purchase decision |
+
+#### Day 31 — Spec Template (fill in with AI):
+```
+Desktop or floor mounted?    →
+Maximum reach?               → mm
+Target payload?              → g
+Desired speed?               → deg/s
+Position accuracy?           → mm
+Total arm weight target?     → kg
+Continuous or occasional?    →
+```
+
+#### Day 33 — Torque Formula:
+```
+τ_shoulder = (m_forearm + m_wrist + m_gripper + m_payload) × g × L_upper_arm × safety_factor
+```
+- safety_factor = 1.5 to 2.0 recommended
+
+**STAGE GATE 2: Only purchase hardware after Day 35 BOM is complete and torque math confirms motor selection.**
+
+---
+
+## PHASE 6 — BUILD ONE REAL JOINT
+### Days 36–45: Physical Prototype (Shoulder First)
+
+| Day | Topic | Pass Test |
+|-----|-------|-----------|
+| 36 | Print joint housing + link | Part fits motor shaft |
+| 37 | Motor + driver bench test | Motor spins on command |
+| 38 | Homing + limit switch | Known zero position repeatable |
+| 39 | ESP32 serial protocol | `angle 45` → joint moves to 45deg |
+| 40 | ROS2 → ESP32 bridge | `ros2 topic pub /joint_cmd` moves physical joint |
+| 41 | Angle calibration | Requested vs actual within +/-2deg |
+| 42 | Backlash measurement | Direction-reversal error documented |
+| 43 | Thermal test | 30-min continuous run, no overheating |
+| 44 | Load test | Moves target payload without stalling |
+| 45 | Design revision | Joint V2 approved or issues fixed |
+
+#### Day 39 — ESP32 Serial Protocol (minimal):
+```
+Command format:  MOVE,<joint_id>,<angle_degrees>
+Response:        OK,<joint_id>,<actual_angle>
+Homing:          HOME,<joint_id>
+Emergency stop:  STOP
+```
+
+**STAGE GATE 3: Only buy remaining 5 joint hardware after this one passes all Day 45 tests.**
+
+---
+
+## PHASE 7 — BUILD PHYSICAL ARM
+### Days 46–55
+
+| Day | Topic | Milestone |
+|-----|-------|-----------|
+| 46 | Base (J1) | Base rotation working |
+| 47 | Shoulder (J2) | Main lifting joint |
+| 48 | Elbow (J3) | 3-axis structure |
+| 49 | Electronics (J1-J3) | 3-joint coordinated control |
+| 50 | ROS control J1-J3 | Half-arm responds to ROS commands |
+| 51 | Wrist pitch (J4) | Wrist assembly |
+| 52 | Wrist roll/yaw (J5/J6) | Full orientation |
+| 53 | Gripper | End effector open/close |
+| 54 | Cable management | Safe, reliable wiring |
+| 55 | Full joint test | Every joint moves individually |
+
+---
+
+## PHASE 8 — FINAL INTEGRATION
+### Days 56–60: MoveIt → Real Arm
+
+| Day | Topic | Deliverable |
+|-----|-------|-------------|
+| 56 | Hardware interface plugin | `devotics_hw_interface` connects ros2_control to ESP32 |
+| 57 | Joint calibration | URDF limits match physical limits |
+| 58 | MoveIt Plan+Execute on real arm | First automated movement |
+| 59 | Pick-and-place demo | Known cube position picked and placed |
+| 60 | Validation + documentation | Full test suite + project docs |
+
+#### Day 56 — Hardware Interface Structure:
+```
+src/devotics_hw_interface/
+├── include/devotics_hw_interface/
+│   └── devotics_hw_interface.hpp
+├── src/
+│   └── devotics_hw_interface.cpp
+├── CMakeLists.txt
+└── package.xml
+```
+
+Key class inherits `hardware_interface::SystemInterface`.
+Overrides: `on_init()`, `read()`, `write()`.
+`write()` sends serial commands to ESP32. `read()` receives joint state feedback.
+
+---
+
+## Final Acceptance Criteria (V1 Complete)
+
+| Requirement | Status |
+|-------------|--------|
+| URDF/Xacro model | 🔄 |
+| RViz visualization | ✅ (Day 3) |
+| Correct TF tree | 🔄 (Day 5) |
+| MoveIt configuration | ⬜ |
+| Motion planning | ⬜ |
+| ros2_control | ⬜ |
+| Physical arm | ⬜ |
+| Homing | ⬜ |
+| Joint limits | 🔄 (Day 10) |
+| Gripper | ⬜ |
+| Real joint calibration | ⬜ |
+| MoveIt → real arm | ⬜ |
+| Emergency stop | ⬜ |
+| Pick-and-place demo | ⬜ |
+| BOM | ⬜ |
+| Wiring diagram | ⬜ |
+| CAD/STL files | ⬜ |
+| Software repository | ✅ (github pushed) |
+| Assembly documentation | ⬜ |
+| Test results | ⬜ |
+
+---
+
+## After V1 — Optional Phase (Week 13+)
+
+Only after reliable pick-and-place:
+1. Camera → ROS image → OpenCV → detect cube position
+2. Coordinate transformation → camera frame → robot frame via TF
+3. Vision-guided pick → camera sees cube → MoveIt picks automatically
+4. YOLO / AI grasp → unstructured pick (not Day 60 scope)
+
+---
+
+## Spending Plan (Enforced by Stage Gates)
+
+| Phase | Hardware Budget |
+|-------|----------------|
+| Days 1-30 | NPR 0 — software/simulation only |
+| Days 31-35 | Engineering calculations + BOM only |
+| Days 36-45 | ONE joint hardware only |
+| Days 46-55 | Remaining arm hardware (only if Stage Gate 3 passed) |
+
+---
+
+## Quick Reference Commands
+
+```bash
+# Build and source
+colcon build --packages-select devotics_arm_description
+source install/setup.bash
+
+# Launch arm in RViz
+ros2 launch devotics_arm_description display.launch.py
+
+# TF inspection
+ros2 topic echo /tf
+ros2 run tf2_tools view_frames
+ros2 run tf2_ros tf2_echo base_link wrist3_link
+
+# Xacro check
+ros2 run xacro xacro urdf/devotics_arm.urdf.xacro
+
+# Controller check
+ros2 control list_controllers
+
+# Daily commit
+git add -A && git commit -m "Day X: <what you built>"
+git push origin main
+```
