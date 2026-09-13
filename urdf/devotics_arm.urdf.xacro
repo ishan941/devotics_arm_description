@@ -1,0 +1,303 @@
+<?xml version="1.0"?>
+<robot name="devotics_arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- ============================================================ -->
+    <!-- CONSTANTS & PROPERTIES                                       -->
+    <!-- ============================================================ -->
+    <xacro:property name="pi_val" value="3.14159265359"/>
+
+    <!-- Link Dimensions -->
+    <xacro:property name="base_radius"       value="0.10"/>
+    <xacro:property name="base_length"       value="0.10"/>
+
+    <xacro:property name="shoulder_size_x"   value="0.12"/>
+    <xacro:property name="shoulder_size_y"   value="0.12"/>
+    <xacro:property name="shoulder_size_z"   value="0.10"/>
+
+    <xacro:property name="upper_arm_size_x"  value="0.08"/>
+    <xacro:property name="upper_arm_size_y"  value="0.08"/>
+    <xacro:property name="upper_arm_length"  value="0.30"/>
+
+    <xacro:property name="forearm_size_x"    value="0.07"/>
+    <xacro:property name="forearm_size_y"    value="0.07"/>
+    <xacro:property name="forearm_length"    value="0.25"/>
+
+    <xacro:property name="wrist1_radius"     value="0.04"/>
+    <xacro:property name="wrist1_length"     value="0.10"/>
+
+    <xacro:property name="wrist2_radius"     value="0.035"/>
+    <xacro:property name="wrist2_length"     value="0.10"/>
+
+    <xacro:property name="wrist3_radius"     value="0.03"/>
+    <xacro:property name="wrist3_length"     value="0.06"/>
+
+    <xacro:property name="finger_size_x"     value="0.02"/>
+    <xacro:property name="finger_size_y"     value="0.02"/>
+    <xacro:property name="finger_size_z"     value="0.06"/>
+    <xacro:property name="finger_stroke"     value="0.03"/>
+
+    <!-- Joint Limits -->
+    <xacro:property name="j1_lower" value="-3.14"/>
+    <xacro:property name="j1_upper" value="3.14"/>
+
+    <xacro:property name="j2_lower" value="-1.57"/>
+    <xacro:property name="j2_upper" value="1.57"/>
+
+    <xacro:property name="j3_lower" value="-2.0"/>
+    <xacro:property name="j3_upper" value="2.0"/>
+
+    <xacro:property name="j4_lower" value="-1.57"/>
+    <xacro:property name="j4_upper" value="1.57"/>
+
+    <xacro:property name="j5_lower" value="-3.14"/>
+    <xacro:property name="j5_upper" value="3.14"/>
+
+    <xacro:property name="j6_lower" value="-3.14"/>
+    <xacro:property name="j6_upper" value="3.14"/>
+
+    <!-- ============================================================ -->
+    <!-- MATERIALS                                                    -->
+    <!-- ============================================================ -->
+    <material name="base_color">
+        <color rgba="0.20 0.20 0.20 1"/>
+    </material>
+
+    <material name="shoulder_color">
+        <color rgba="0.15 0.35 0.80 1"/>
+    </material>
+
+    <material name="upper_arm_color">
+        <color rgba="0.10 0.55 0.85 1"/>
+    </material>
+
+    <material name="forearm_color">
+        <color rgba="0.20 0.75 0.45 1"/>
+    </material>
+
+    <material name="wrist1_color">
+        <color rgba="0.85 0.50 0.10 1"/>
+    </material>
+
+    <material name="wrist2_color">
+        <color rgba="0.90 0.70 0.10 1"/>
+    </material>
+
+    <material name="wrist3_color">
+        <color rgba="0.95 0.90 0.10 1"/>
+    </material>
+
+    <material name="gripper_base_color">
+        <color rgba="0.20 0.20 0.20 1"/>
+    </material>
+
+    <material name="finger_color">
+        <color rgba="0.60 0.60 0.60 1"/>
+    </material>
+
+
+    <!-- ============================================================ -->
+    <!-- BASE LINK                                                    -->
+    <!-- ============================================================ -->
+    <link name="base_link">
+        <visual>
+            <origin xyz="0 0 ${base_length / 2}" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="${base_radius}" length="${base_length}"/>
+            </geometry>
+            <material name="base_color"/>
+        </visual>
+    </link>
+
+
+    <!-- ============================================================ -->
+    <!-- SHOULDER LINK & JOINT 1                                      -->
+    <!-- ============================================================ -->
+    <link name="shoulder_link">
+        <visual>
+            <origin xyz="0 0 ${shoulder_size_z / 2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${shoulder_size_x} ${shoulder_size_y} ${shoulder_size_z}"/>
+            </geometry>
+            <material name="shoulder_color"/>
+        </visual>
+    </link>
+
+    <joint name="joint1" type="revolute">
+        <parent link="base_link"/>
+        <child link="shoulder_link"/>
+        <origin xyz="0 0 ${base_length}" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="${j1_lower}" upper="${j1_upper}" effort="20" velocity="1.0"/>
+    </joint>
+
+
+    <!-- ============================================================ -->
+    <!-- UPPER ARM LINK & JOINT 2                                     -->
+    <!-- ============================================================ -->
+    <link name="upper_arm_link">
+        <visual>
+            <origin xyz="0 0 ${upper_arm_length / 2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${upper_arm_size_x} ${upper_arm_size_y} ${upper_arm_length}"/>
+            </geometry>
+            <material name="upper_arm_color"/>
+        </visual>
+    </link>
+
+    <joint name="joint2" type="revolute">
+        <parent link="shoulder_link"/>
+        <child link="upper_arm_link"/>
+        <origin xyz="0 0 ${shoulder_size_z}" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="${j2_lower}" upper="${j2_upper}" effort="20" velocity="1.0"/>
+    </joint>
+
+
+    <!-- ============================================================ -->
+    <!-- FOREARM LINK & JOINT 3                                       -->
+    <!-- ============================================================ -->
+    <link name="forearm_link">
+        <visual>
+            <origin xyz="0 0 ${forearm_length / 2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${forearm_size_x} ${forearm_size_y} ${forearm_length}"/>
+            </geometry>
+            <material name="forearm_color"/>
+        </visual>
+    </link>
+
+    <joint name="joint3" type="revolute">
+        <parent link="upper_arm_link"/>
+        <child link="forearm_link"/>
+        <origin xyz="0 0 ${upper_arm_length}" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="${j3_lower}" upper="${j3_upper}" effort="15" velocity="1.0"/>
+    </joint>
+
+
+    <!-- ============================================================ -->
+    <!-- WRIST LINK 1 & JOINT 4 (PITCH)                               -->
+    <!-- ============================================================ -->
+    <link name="wrist1_link">
+        <visual>
+            <origin xyz="0 0 ${wrist1_length / 2}" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="${wrist1_radius}" length="${wrist1_length}"/>
+            </geometry>
+            <material name="wrist1_color"/>
+        </visual>
+    </link>
+
+    <joint name="joint4" type="revolute">
+        <parent link="forearm_link"/>
+        <child link="wrist1_link"/>
+        <origin xyz="0 0 ${forearm_length}" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="${j4_lower}" upper="${j4_upper}" effort="10" velocity="1.0"/>
+    </joint>
+
+
+    <!-- ============================================================ -->
+    <!-- WRIST LINK 2 & JOINT 5 (ROLL)                                -->
+    <!-- ============================================================ -->
+    <link name="wrist2_link">
+        <visual>
+            <origin xyz="0 0 ${wrist2_length / 2}" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="${wrist2_radius}" length="${wrist2_length}"/>
+            </geometry>
+            <material name="wrist2_color"/>
+        </visual>
+    </link>
+
+    <joint name="joint5" type="revolute">
+        <parent link="wrist1_link"/>
+        <child link="wrist2_link"/>
+        <origin xyz="0 0 ${wrist1_length}" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="${j5_lower}" upper="${j5_upper}" effort="10" velocity="1.5"/>
+    </joint>
+
+
+    <!-- ============================================================ -->
+    <!-- WRIST LINK 3 & JOINT 6 (YAW / TOOL FLANGE)                   -->
+    <!-- ============================================================ -->
+    <link name="wrist3_link">
+        <visual>
+            <origin xyz="0 0 ${wrist3_length / 2}" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="${wrist3_radius}" length="${wrist3_length}"/>
+            </geometry>
+            <material name="wrist3_color"/>
+        </visual>
+    </link>
+
+    <joint name="joint6" type="revolute">
+        <parent link="wrist2_link"/>
+        <child link="wrist3_link"/>
+        <origin xyz="0 0 ${wrist2_length}" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="${j6_lower}" upper="${j6_upper}" effort="5" velocity="2.0"/>
+    </joint>
+
+
+    <!-- ============================================================ -->
+    <!-- GRIPPER BASE LINK & FIXED JOINT                              -->
+    <!-- ============================================================ -->
+    <link name="gripper_base_link">
+        <visual>
+            <origin xyz="0 0 0.02" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.08 0.04 0.04"/>
+            </geometry>
+            <material name="gripper_base_color"/>
+        </visual>
+    </link>
+
+    <joint name="gripper_base_joint" type="fixed">
+        <parent link="wrist3_link"/>
+        <child link="gripper_base_link"/>
+        <origin xyz="0 0 ${wrist3_length}" rpy="0 0 0"/>
+    </joint>
+
+
+    <!-- ============================================================ -->
+    <!-- GRIPPER FINGERS (PRISMATIC)                                  -->
+    <!-- ============================================================ -->
+    <link name="left_finger_link">
+        <visual>
+            <origin xyz="0 0 ${finger_size_z / 2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${finger_size_x} ${finger_size_y} ${finger_size_z}"/>
+            </geometry>
+            <material name="finger_color"/>
+        </visual>
+    </link>
+
+    <joint name="left_finger_joint" type="prismatic">
+        <parent link="gripper_base_link"/>
+        <child link="left_finger_link"/>
+        <origin xyz="0 0.02 0.04" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="0.0" upper="${finger_stroke}" effort="10" velocity="0.1"/>
+    </joint>
+
+    <link name="right_finger_link">
+        <visual>
+            <origin xyz="0 0 ${finger_size_z / 2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${finger_size_x} ${finger_size_y} ${finger_size_z}"/>
+            </geometry>
+            <material name="finger_color"/>
+        </visual>
+    </link>
+
+    <joint name="right_finger_joint" type="prismatic">
+        <parent link="gripper_base_link"/>
+        <child link="right_finger_link"/>
+        <origin xyz="0 -0.02 0.04" rpy="0 0 0"/>
+        <axis xyz="0 -1 0"/>
+        <limit lower="0.0" upper="${finger_stroke}" effort="10" velocity="0.1"/>
+    </joint>
+
+</robot>
