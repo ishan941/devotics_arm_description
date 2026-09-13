@@ -1,4 +1,5 @@
 import os
+import xacro
 
 from launch import LaunchDescription
 from launch_ros.actions import Node
@@ -11,14 +12,14 @@ def generate_launch_description():
         'devotics_arm_description'
     )
 
-    urdf_path = os.path.join(
+    xacro_path = os.path.join(
         package_path,
         'urdf',
-        'devotics_arm.urdf'
+        'devotics_arm.urdf.xacro'
     )
 
-    with open(urdf_path, 'r') as file:
-        robot_description = file.read()
+    robot_description_doc = xacro.process_file(xacro_path)
+    robot_description = robot_description_doc.toxml()
 
     return LaunchDescription([
 
