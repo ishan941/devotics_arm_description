@@ -154,4 +154,55 @@
 
     </joint>
 
+
+    <!-- ===================================== -->
+    <!-- WRIST LINK 1 -->
+    <!-- ===================================== -->
+
+    <link name="wrist1_link">
+        <visual>
+            <origin xyz="0 0 0.05" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="0.04" length="0.10"/>
+            </geometry>
+            <material name="wrist1_color">
+                <color rgba="0.85 0.50 0.10 1"/>
+            </material>
+        </visual>
+    </link>
+
+    <!-- JOINT 4 - WRIST PITCH -->
+    <joint name="joint4" type="revolute">
+        <parent link="forearm_link"/>
+        <child link="wrist1_link"/>
+        <origin xyz="0 0 0.25" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-1.57" upper="1.57" effort="10" velocity="1.0"/>
+    </joint>
+
+    <!-- ===================================== -->
+    <!-- WRIST LINK 2 -->
+    <!-- ===================================== -->
+
+    <link name="wrist2_link">
+        <visual>
+            <origin xyz="0 0 0.05" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="0.035" length="0.10"/>
+            </geometry>
+            <material name="wrist2_color">
+                <color rgba="0.90 0.70 0.10 1"/>
+            </material>
+        </visual>
+    </link>
+
+    <!-- JOINT 5 - WRIST ROLL -->
+    <joint name="joint5" type="revolute">
+        <parent link="wrist1_link"/>
+        <child link="wrist2_link"/>
+        <origin xyz="0 0 0.10" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="-3.14" upper="3.14" effort="10" velocity="1.5"/>
+    </joint>
+
 </robot>
