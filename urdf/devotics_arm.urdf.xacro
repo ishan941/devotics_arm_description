@@ -106,6 +106,12 @@
             </geometry>
             <material name="base_color"/>
         </visual>
+        <collision>
+            <origin xyz="0 0 ${base_length / 2}" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="${base_radius}" length="${base_length}"/>
+            </geometry>
+        </collision>
     </link>
 
 
@@ -120,6 +126,12 @@
             </geometry>
             <material name="shoulder_color"/>
         </visual>
+        <collision>
+            <origin xyz="0 0 ${shoulder_size_z / 2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${shoulder_size_x} ${shoulder_size_y} ${shoulder_size_z}"/>
+            </geometry>
+        </collision>
     </link>
 
     <joint name="joint1" type="revolute">
@@ -142,6 +154,12 @@
             </geometry>
             <material name="upper_arm_color"/>
         </visual>
+        <collision>
+            <origin xyz="0 0 ${upper_arm_length / 2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${upper_arm_size_x} ${upper_arm_size_y} ${upper_arm_length}"/>
+            </geometry>
+        </collision>
     </link>
 
     <joint name="joint2" type="revolute">
@@ -164,6 +182,12 @@
             </geometry>
             <material name="forearm_color"/>
         </visual>
+        <collision>
+            <origin xyz="0 0 ${forearm_length / 2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${forearm_size_x} ${forearm_size_y} ${forearm_length}"/>
+            </geometry>
+        </collision>
     </link>
 
     <joint name="joint3" type="revolute">
@@ -186,6 +210,12 @@
             </geometry>
             <material name="wrist1_color"/>
         </visual>
+        <collision>
+            <origin xyz="0 0 ${wrist1_length / 2}" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="${wrist1_radius}" length="${wrist1_length}"/>
+            </geometry>
+        </collision>
     </link>
 
     <joint name="joint4" type="revolute">
@@ -208,6 +238,12 @@
             </geometry>
             <material name="wrist2_color"/>
         </visual>
+        <collision>
+            <origin xyz="0 0 ${wrist2_length / 2}" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="${wrist2_radius}" length="${wrist2_length}"/>
+            </geometry>
+        </collision>
     </link>
 
     <joint name="joint5" type="revolute">
@@ -230,6 +266,12 @@
             </geometry>
             <material name="wrist3_color"/>
         </visual>
+        <collision>
+            <origin xyz="0 0 ${wrist3_length / 2}" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="${wrist3_radius}" length="${wrist3_length}"/>
+            </geometry>
+        </collision>
     </link>
 
     <joint name="joint6" type="revolute">
@@ -252,6 +294,12 @@
             </geometry>
             <material name="gripper_base_color"/>
         </visual>
+        <collision>
+            <origin xyz="0 0 0.02" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.08 0.04 0.04"/>
+            </geometry>
+        </collision>
     </link>
 
     <joint name="gripper_base_joint" type="fixed">
@@ -272,6 +320,12 @@
             </geometry>
             <material name="finger_color"/>
         </visual>
+        <collision>
+            <origin xyz="0 0 ${finger_size_z / 2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${finger_size_x} ${finger_size_y} ${finger_size_z}"/>
+            </geometry>
+        </collision>
     </link>
 
     <joint name="left_finger_joint" type="prismatic">
@@ -290,6 +344,12 @@
             </geometry>
             <material name="finger_color"/>
         </visual>
+        <collision>
+            <origin xyz="0 0 ${finger_size_z / 2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${finger_size_x} ${finger_size_y} ${finger_size_z}"/>
+            </geometry>
+        </collision>
     </link>
 
     <joint name="right_finger_joint" type="prismatic">
@@ -298,6 +358,19 @@
         <origin xyz="0 -0.02 0.04" rpy="0 0 0"/>
         <axis xyz="0 -1 0"/>
         <limit lower="0.0" upper="${finger_stroke}" effort="10" velocity="0.1"/>
+    </joint>
+
+
+    <!-- ============================================================ -->
+    <!-- TOOL CENTER POINT (TCP / tool0)                              -->
+    <!-- Virtual frame at the grasp center between finger tips        -->
+    <!-- ============================================================ -->
+    <link name="tool0"/>
+
+    <joint name="tool0_joint" type="fixed">
+        <parent link="gripper_base_link"/>
+        <child link="tool0"/>
+        <origin xyz="0 0 0.10" rpy="0 0 0"/>
     </joint>
 
 </robot>
