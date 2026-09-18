@@ -1,0 +1,76 @@
+{
+  "communities": {
+    "0": [
+      "ament_index_python_packages",
+      "launch",
+      "launch_display_launch",
+      "launch_display_launch_generate_launch_description",
+      "launch_ros_actions",
+      "xacro"
+    ],
+    "1": [
+      "math",
+      "scripts_ik_demo",
+      "scripts_ik_demo_rationale_13",
+      "scripts_ik_demo_rationale_2",
+      "scripts_ik_demo_solve_ik_2d"
+    ],
+    "2": [
+      "scripts_check_pip",
+      "scripts_install_pip",
+      "scripts_run_uv_graphify",
+      "shutil",
+      "subprocess"
+    ],
+    "3": [
+      "glob",
+      "scripts_diagnose_and_fix",
+      "scripts_diagnose_and_fix_log",
+      "yaml"
+    ],
+    "4": [
+      "scripts_apply_all_fixes",
+      "scripts_apply_all_fixes_log",
+      "scripts_fix_moveit_config",
+      "sys"
+    ],
+    "5": [
+      "os",
+      "scripts_finish_graphify",
+      "scripts_inspect_launch"
+    ]
+  },
+  "cohesion": {
+    "0": 0.3333333333333333,
+    "1": 0.4,
+    "2": 0.5,
+    "3": 0.5,
+    "4": 0.5,
+    "5": 0.6666666666666666
+  },
+  "gods": [
+    {
+      "id": "scripts_ik_demo_solve_ik_2d",
+      "label": "solve_ik_2d()",
+      "degree": 2
+    },
+    {
+      "id": "scripts_ik_demo_rationale_13",
+      "label": "Solves Inverse Kinematics for a 2-link planar arm in the (X, Z) plane. Returns…",
+      "degree": 1
+    },
+    {
+      "id": "scripts_ik_demo_rationale_2",
+      "label": "Day 12: Inverse Kinematics (IK) Intuition Script for Devotics Arm Demonstrates…",
+      "degree": 1
+    }
+  ],
+  "surprises": [],
+  "questions": [
+    {
+      "type": "no_signal",
+      "question": null,
+      "why": "Not enough signal to generate questions. This usually means the corpus has no AMBIGUOUS edges, no bridge nodes, no INFERRED relationships, and all communities are tightly cohesive. Add more files or run with --mode deep to extract richer edges."
+    }
+  ]
+}

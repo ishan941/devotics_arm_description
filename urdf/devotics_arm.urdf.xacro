@@ -373,4 +373,10 @@
         <origin xyz="0 0 0.10" rpy="0 0 0"/>
     </joint>
 
+    <!-- ============================================================ -->
+    <!-- ROS2_CONTROL HARDWARE INTERFACE (MOCK SYSTEM)                -->
+    <!-- ============================================================ -->
+    <xacro:include filename="$(find devotics_arm_description)/urdf/devotics_arm.ros2_control.xacro"/>
+    <xacro:devotics_arm_ros2_control name="DevoticsArmMockHardware"/>
+
 </robot>
