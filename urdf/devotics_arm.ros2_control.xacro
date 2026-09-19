@@ -47,6 +47,24 @@
         </state_interface>
         <state_interface name="velocity"/>
       </joint>
+       <!-- LEFT FINGER -->
+      <joint name="left_finger_joint">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+      </joint>
+      <!-- RIGHT FINGER -->
+      <joint name="right_finger_joint">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+      </joint>
+
+
     </ros2_control>
   </xacro:macro>
 </robot>
