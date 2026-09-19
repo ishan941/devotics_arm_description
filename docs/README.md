@@ -19,6 +19,7 @@
 | 📘 [**Day 14: ros2_control & Mock Hardware**](file:///home/ishan/ros2_ws/src/devotics_arm_description/docs/DAY_14_ROS2_CONTROL_AND_MOCK_HARDWARE.md) | `mock_components/GenericSystem`, `ros2_controllers.yaml`, `moveit_controllers.yaml` | Aligned action namespaces (`follow_joint_trajectory`) between controller manager and MoveIt Simple Controller Manager. |
 | 📘 [**Day 15: Trajectory Execution & TOTG**](file:///home/ishan/ros2_ws/src/devotics_arm_description/docs/DAY_15_TRAJECTORY_EXECUTION_AND_TOTG_DEBUGGING.md) | **The "Plan Works, Execute Fails" Mystery**, Time-Optimal Parameterization (TOTG), `joint_limits.yaml` | **Major Milestone:** Diagnosed zero acceleration limits causing identical 0.0s timestamps; rebuilt with `--symlink-install`; achieved autonomous execution! |
 | 📘 [**Day 16: Graphify Knowledge Graph**](file:///home/ishan/ros2_ws/src/devotics_arm_description/docs/DAY_16_GRAPHIFY_KNOWLEDGE_GRAPH.md) | Codebase AST Knowledge Graph, Standalone `uv`, `graphifyy` CLI, Interactive HTML | Bypassed sudo/pip restrictions with `uv`; mapped code into AST graph (`graph.html`); registered native Antigravity skill. |
+| 📘 [**Days 21–25: ros2_control & Autonomous Execution**](file:///home/ishan/ros2_ws/src/devotics_arm_description/docs/DAY_21_TO_25_ROS2_CONTROL_AND_AUTONOMOUS_EXECUTION.md) | Multi-Controller Management, `gripper_controller`, ROS 2 Action Clients, Autonomous State Machine | Added parallel gripper hardware interfaces; installed `ros2controlcli`; verified `[claimed]` channels; executed autonomous Python pick-and-place script. |
 
 ---
 
