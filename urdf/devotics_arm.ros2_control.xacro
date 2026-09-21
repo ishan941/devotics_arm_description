@@ -1,10 +1,16 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:macro name="devotics_arm_ros2_control" params="name">
+  <xacro:macro name="devotics_arm_ros2_control" params="name sim_mode:=false">
     <ros2_control name="${name}" type="system">
       <hardware>
-        <plugin>mock_components/GenericSystem</plugin>
+        <xacro:if value="${sim_mode}">
+          <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+        </xacro:if>
+        <xacro:unless value="${sim_mode}">
+          <plugin>mock_components/GenericSystem</plugin>
+        </xacro:unless>
       </hardware>
+
       <joint name="joint1">
         <command_interface name="position"/>
         <state_interface name="position">
@@ -47,7 +53,8 @@
         </state_interface>
         <state_interface name="velocity"/>
       </joint>
-       <!-- LEFT FINGER -->
+
+      <!-- LEFT FINGER -->
       <joint name="left_finger_joint">
         <command_interface name="position"/>
         <state_interface name="position">
@@ -55,6 +62,7 @@
         </state_interface>
         <state_interface name="velocity"/>
       </joint>
+
       <!-- RIGHT FINGER -->
       <joint name="right_finger_joint">
         <command_interface name="position"/>
@@ -63,8 +71,6 @@
         </state_interface>
         <state_interface name="velocity"/>
       </joint>
-
-
     </ros2_control>
   </xacro:macro>
 </robot>

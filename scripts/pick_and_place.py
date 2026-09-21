@@ -89,7 +89,7 @@ def main(args=None):
     # Named joint targets [j1, j2, j3, j4, j5, j6]
     HOME_POSE = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     READY_POSE = [0.0, -0.5, 0.8, 0.0, 0.0, 0.0]
-    PICKUP_APPROACH = [0.0, -1.0, 1.4, -0.4, 0.0, 0.0]
+    PICKUP_APPROACH = [0.0, -1.2, 1.8, -0.6, 0.0, 0.0]
 
     try:
         # Step 1: Move to Ready Pose

@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <robot name="devotics_arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<xacro:arg name="sim_mode" default="false"/>
+
 
     <!-- ============================================================ -->
     <!-- CONSTANTS & PROPERTIES                                       -->
@@ -54,6 +56,33 @@
 
     <xacro:property name="j6_lower" value="-3.14"/>
     <xacro:property name="j6_upper" value="3.14"/>
+
+
+        <!-- INERTIA MACROS -->
+    <xacro:macro name="cylinder_inertia" params="mass radius length *origin">
+        <inertial>
+            <xacro:insert_block name="origin"/>
+            <mass value="${mass}"/>
+            <inertia
+                ixx="${mass*(3*radius*radius + length*length)/12}"
+                iyy="${mass*(3*radius*radius + length*length)/12}"
+                izz="${mass*radius*radius/2}"
+                ixy="0" ixz="0" iyz="0"/>
+        </inertial>
+    </xacro:macro>
+
+    <xacro:macro name="box_inertia" params="mass x y z *origin">
+        <inertial>
+            <xacro:insert_block name="origin"/>
+            <mass value="${mass}"/>
+            <inertia
+                ixx="${mass*(y*y + z*z)/12}"
+                iyy="${mass*(x*x + z*z)/12}"
+                izz="${mass*(x*x + y*y)/12}"
+                ixy="0" ixz="0" iyz="0"/>
+        </inertial>
+    </xacro:macro>
+
 
     <!-- ============================================================ -->
     <!-- MATERIALS                                                    -->
@@ -112,9 +141,21 @@
                 <cylinder radius="${base_radius}" length="${base_length}"/>
             </geometry>
         </collision>
+        <xacro:cylinder_inertia mass="2.5" radius="${base_radius}" length="${base_length}">
+            <origin xyz="0 0 ${base_length/2}" rpy="0 0 0"/>
+        </xacro:cylinder_inertia>
     </link>
+        <!-- WORLD LINK (Anchors the robot base to the Gazebo ground) -->
+    <link name="world"/>
+
+    <joint name="world_to_base_joint" type="fixed">
+        <parent link="world"/>
+        <child link="base_link"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
 
 
+    
     <!-- ============================================================ -->
     <!-- SHOULDER LINK & JOINT 1                                      -->
     <!-- ============================================================ -->
@@ -132,6 +173,9 @@
                 <box size="${shoulder_size_x} ${shoulder_size_y} ${shoulder_size_z}"/>
             </geometry>
         </collision>
+        <xacro:box_inertia mass="1.2" x="0.12" y="0.12" z="0.10">
+            <origin xyz="0 0 0.05" rpy="0 0 0"/>
+        </xacro:box_inertia>
     </link>
 
     <joint name="joint1" type="revolute">
@@ -160,6 +204,9 @@
                 <box size="${upper_arm_size_x} ${upper_arm_size_y} ${upper_arm_length}"/>
             </geometry>
         </collision>
+        <xacro:box_inertia mass="0.9" x="${upper_arm_size_x}" y="${upper_arm_size_y}" z="${upper_arm_length}">
+            <origin xyz="0 0 ${upper_arm_length/2}" rpy="0 0 0"/>
+        </xacro:box_inertia>
     </link>
 
     <joint name="joint2" type="revolute">
@@ -188,6 +235,9 @@
                 <box size="${forearm_size_x} ${forearm_size_y} ${forearm_length}"/>
             </geometry>
         </collision>
+        <xacro:box_inertia mass="0.7" x="${forearm_size_x}" y="${forearm_size_y}" z="${forearm_length}">
+            <origin xyz="0 0 ${forearm_length/2}" rpy="0 0 0"/>
+        </xacro:box_inertia>
     </link>
 
     <joint name="joint3" type="revolute">
@@ -216,6 +266,9 @@
                 <cylinder radius="${wrist1_radius}" length="${wrist1_length}"/>
             </geometry>
         </collision>
+        <xacro:cylinder_inertia mass="0.3" radius="0.04" length="0.10">
+            <origin xyz="0 0 0.05" rpy="0 0 0"/>
+        </xacro:cylinder_inertia>
     </link>
 
     <joint name="joint4" type="revolute">
@@ -244,6 +297,9 @@
                 <cylinder radius="${wrist2_radius}" length="${wrist2_length}"/>
             </geometry>
         </collision>
+        <xacro:cylinder_inertia mass="0.25" radius="0.035" length="0.10">
+            <origin xyz="0 0 0.05" rpy="0 0 0"/>
+        </xacro:cylinder_inertia>
     </link>
 
     <joint name="joint5" type="revolute">
@@ -272,6 +328,9 @@
                 <cylinder radius="${wrist3_radius}" length="${wrist3_length}"/>
             </geometry>
         </collision>
+        <xacro:cylinder_inertia mass="0.15" radius="0.03" length="0.06">
+            <origin xyz="0 0 0.03" rpy="0 0 0"/>
+        </xacro:cylinder_inertia>
     </link>
 
     <joint name="joint6" type="revolute">
@@ -300,6 +359,9 @@
                 <box size="0.08 0.04 0.04"/>
             </geometry>
         </collision>
+        <xacro:box_inertia mass="0.2" x="0.08" y="0.04" z="0.04">
+            <origin xyz="0 0 0.02" rpy="0 0 0"/>
+        </xacro:box_inertia>
     </link>
 
     <joint name="gripper_base_joint" type="fixed">
@@ -326,6 +388,9 @@
                 <box size="${finger_size_x} ${finger_size_y} ${finger_size_z}"/>
             </geometry>
         </collision>
+        <xacro:box_inertia mass="0.05" x="0.02" y="0.02" z="0.06">
+            <origin xyz="0 0.02 0.03" rpy="0 0 0"/>
+        </xacro:box_inertia>
     </link>
 
     <joint name="left_finger_joint" type="prismatic">
@@ -350,6 +415,9 @@
                 <box size="${finger_size_x} ${finger_size_y} ${finger_size_z}"/>
             </geometry>
         </collision>
+        <xacro:box_inertia mass="0.05" x="0.02" y="0.02" z="0.06">
+            <origin xyz="0 -0.02 0.03" rpy="0 0 0"/>
+        </xacro:box_inertia>
     </link>
 
     <joint name="right_finger_joint" type="prismatic">
@@ -376,7 +444,15 @@
     <!-- ============================================================ -->
     <!-- ROS2_CONTROL HARDWARE INTERFACE (MOCK SYSTEM)                -->
     <!-- ============================================================ -->
-    <xacro:include filename="$(find devotics_arm_description)/urdf/devotics_arm.ros2_control.xacro"/>
-    <xacro:devotics_arm_ros2_control name="DevoticsArmMockHardware"/>
+    <xacro:include filename="devotics_arm.ros2_control.xacro"/>
+<xacro:devotics_arm_ros2_control name="DevoticsMockHardware" sim_mode="$(arg sim_mode)"/>
+
+<!-- Gazebo ROS 2 Control Plugin -->
+<gazebo>
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+        <parameters>$(find devotics_arm_moveit_config)/config/ros2_controllers.yaml</parameters>
+    </plugin>
+</gazebo>
+
 
 </robot>
