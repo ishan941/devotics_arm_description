@@ -30,4 +30,15 @@ install(
     worlds
   DESTINATION share/${PROJECT_NAME}
 )
+
+# Install Python scripts as ROS 2 executables
+# These are accessible via: ros2 run devotics_arm_description <script_name>
+install(
+  PROGRAMS
+    scripts/arm_v0_serial_node.py
+    scripts/arm_v0_pick_and_place.py
+    scripts/arm_v0_stack_palletizer.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()

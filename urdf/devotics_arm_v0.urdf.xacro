@@ -1,0 +1,377 @@
+<?xml version="1.0"?>
+<!--
+  ================================================================
+  DEVOTICS ARM V0 — Robot Description (URDF/Xacro)
+  ================================================================
+  Physical robot: HomeGenie Robotic Arm V2 Rev 3 (3D-printed)
+  Actuators:      4 × MG90S micro servo motors
+  Controller:     ESP32 via USB serial
+  ROS 2:          Jazzy
+
+  Kinematic structure:
+    base_link
+      └─ base_joint        [revolute Z]  → base_rotating_link
+           └─ shoulder_joint [revolute Y]  → upper_arm_link
+                └─ elbow_joint   [revolute Y]  → forearm_link
+                     └─ gripper_joint [revolute Y]  → gripper_link
+                          └─ tool0_joint   [fixed]      → tool0
+
+  Dimension key:
+    F = table surface → J1 rotation axis (PENDING measurement)
+    A = J1 axis → J2 (shoulder) axis      (PENDING measurement)
+    B = J2 axis → J3 (elbow) axis          (~38.9mm from CAD — verify)
+    C = J3 axis → J4 / gripper ref axis   (PENDING measurement)
+    D = J4 axis → fingertip               (PENDING measurement)
+    E = base maximum width                 (72.24mm from CAD)
+
+  Joint limit convention:
+    ROS 0 rad  = servo 90° = home position
+    servo_deg  = servo_home + direction * ros_deg
+    direction  = +1 (default) or -1 (inverted, set in calibration yaml)
+
+  IMPORTANT — PENDING measurements:
+    Replace dim_F, dim_A, dim_C, dim_D ONLY after physically measuring
+    the assembled robot at servo-shaft-center to servo-shaft-center.
+    DO NOT GUESS these values.
+  ================================================================
+-->
+
+<robot name="devotics_arm_v0" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- NOTE: ${pi} is a built-in xacro constant — no need to redefine it -->
+
+
+  <!-- ============================================================ -->
+  <!-- BASE DIMENSIONS  — from CAD/STL (reliable)                  -->
+  <!-- ============================================================ -->
+  <!-- E: Base maximum width = 72.24 mm  (CAD) -->
+  <xacro:property name="base_width"       value="0.07224"/>
+  <!-- Base depth (Y footprint) = 70.58 mm  (CAD) -->
+  <xacro:property name="base_depth"       value="0.07058"/>
+  <!-- Base STL height = 28.59 mm  (CAD) — this is NOT dim_F -->
+  <xacro:property name="base_stl_height"  value="0.02859"/>
+
+  <!-- Gripper housing bounding box — from CAD/STL -->
+  <xacro:property name="gripper_size_x"   value="0.01960"/>  <!-- 19.60 mm -->
+  <xacro:property name="gripper_size_y"   value="0.03735"/>  <!-- 37.35 mm -->
+  <xacro:property name="gripper_size_z"   value="0.02763"/>  <!-- 27.63 mm -->
+
+  <!-- Visual cross-section for arm links (approximate, display only) -->
+  <xacro:property name="arm_w"            value="0.018"/>
+  <xacro:property name="arm_d"            value="0.016"/>
+
+
+  <!-- ============================================================ -->
+  <!-- KINEMATIC DIMENSIONS — PENDING PHYSICAL MEASUREMENT          -->
+  <!--                                                              -->
+  <!-- !! DO NOT CHANGE THESE VALUES WITHOUT MEASURING !!           -->
+  <!-- Replace each PLACEHOLDER after measuring the physical robot. -->
+  <!-- Measure center-of-servo-shaft to center-of-servo-shaft.     -->
+  <!-- ============================================================ -->
+
+  <!--
+    F = table surface → J1 rotation axis  (vertical height, mm)
+    MEASUREMENT PENDING — replace 0.042 with real value
+  -->
+  <xacro:property name="dim_F"  value="0.042"/>  <!-- PLACEHOLDER: measure F -->
+
+  <!--
+    A = J1 rotation axis → J2 (shoulder) axis  (vertical, in rotating base frame)
+    MEASUREMENT PENDING — replace 0.038 with real value
+  -->
+  <xacro:property name="dim_A"  value="0.038"/>  <!-- PLACEHOLDER: measure A -->
+
+  <!--
+    B = J2 (shoulder) axis → J3 (elbow) axis  (along upper arm)
+    CAD-derived estimate ≈ 38.9 mm — VERIFY ON PHYSICAL ROBOT
+  -->
+  <xacro:property name="dim_B"  value="0.0389"/>  <!-- CAD ~38.9mm: verify B -->
+
+  <!--
+    C = J3 (elbow) axis → J4 / gripper reference (along forearm)
+    MEASUREMENT PENDING — replace 0.040 with real value
+  -->
+  <xacro:property name="dim_C"  value="0.040"/>  <!-- PLACEHOLDER: measure C -->
+
+  <!--
+    D = J4 / gripper axis → fingertip  (gripper effective length)
+    MEASUREMENT PENDING — replace 0.030 with real value
+  -->
+  <xacro:property name="dim_D"  value="0.030"/>  <!-- PLACEHOLDER: measure D -->
+
+
+  <!-- ============================================================ -->
+  <!-- JOINT LIMITS                                                 -->
+  <!-- Source: ESP32 firmware software limits                       -->
+  <!-- Convention: ROS 0 rad = servo 90° (home)                    -->
+  <!--   ros_rad = (servo_deg - 90) * pi / 180                     -->
+  <!-- These limits are configurable — adjust in calibration yaml. -->
+  <!-- ============================================================ -->
+
+  <!-- J1 base:     servo 30–150°  → ROS ±60°  = ±1.047 rad -->
+  <xacro:property name="j1_lower"  value="${-60.0 * pi / 180.0}"/>
+  <xacro:property name="j1_upper"  value="${ 60.0 * pi / 180.0}"/>
+
+  <!-- J2 shoulder: servo 60–150°  → ROS -30° to +60° = -0.524 to +1.047 rad -->
+  <xacro:property name="j2_lower"  value="${-30.0 * pi / 180.0}"/>
+  <xacro:property name="j2_upper"  value="${ 60.0 * pi / 180.0}"/>
+
+  <!-- J3 elbow:    servo 60–150°  → ROS -30° to +60° = -0.524 to +1.047 rad -->
+  <xacro:property name="j3_lower"  value="${-30.0 * pi / 180.0}"/>
+  <xacro:property name="j3_upper"  value="${ 60.0 * pi / 180.0}"/>
+
+  <!-- J4 gripper:  servo 60–110°  → ROS -30° to +20° = -0.524 to +0.349 rad -->
+  <!-- negative = closes (servo < 90°), positive = opens (servo > 90°)        -->
+  <xacro:property name="j4_lower"  value="${-30.0 * pi / 180.0}"/>
+  <xacro:property name="j4_upper"  value="${ 20.0 * pi / 180.0}"/>
+
+
+  <!-- ============================================================ -->
+  <!-- MATERIALS                                                    -->
+  <!-- ============================================================ -->
+  <material name="v0_dark_gray">
+    <color rgba="0.20 0.20 0.20 1"/>
+  </material>
+  <material name="v0_dark_blue">
+    <color rgba="0.10 0.25 0.65 1"/>
+  </material>
+  <material name="v0_mid_blue">
+    <color rgba="0.15 0.50 0.85 1"/>
+  </material>
+  <material name="v0_orange">
+    <color rgba="0.90 0.55 0.10 1"/>
+  </material>
+  <material name="v0_light_gray">
+    <color rgba="0.65 0.65 0.65 1"/>
+  </material>
+
+
+  <!-- ============================================================ -->
+  <!-- WORLD ANCHOR                                                 -->
+  <!-- Fixes the robot base to the ground/table in RViz and sim.   -->
+  <!-- ============================================================ -->
+  <link name="world"/>
+
+  <joint name="world_fixed" type="fixed">
+    <parent link="world"/>
+    <child  link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+
+  <!-- ============================================================ -->
+  <!-- BASE LINK                                                    -->
+  <!-- The fixed base that sits on the table.                       -->
+  <!-- Origin: table surface, center of base footprint.            -->
+  <!-- Visual: CAD bounding box (72.24 × 70.58 × 28.59 mm).       -->
+  <!-- ============================================================ -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 ${base_stl_height / 2.0}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${base_width} ${base_depth} ${base_stl_height}"/>
+      </geometry>
+      <material name="v0_dark_gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${base_stl_height / 2.0}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${base_width} ${base_depth} ${base_stl_height}"/>
+      </geometry>
+    </collision>
+  </link>
+
+
+  <!-- ============================================================ -->
+  <!-- J1 — BASE ROTATION JOINT                                     -->
+  <!-- Rotates the entire arm around the vertical (Z) axis.         -->
+  <!-- Origin at J1 servo shaft center, height F above table.      -->
+  <!-- dim_F = PENDING measurement                                  -->
+  <!-- ============================================================ -->
+  <joint name="base_joint" type="revolute">
+    <parent link="base_link"/>
+    <child  link="base_rotating_link"/>
+    <!--
+      xyz: Z = dim_F (table → J1 axis height) — PENDING MEASUREMENT
+      Once F is measured, update dim_F above.
+    -->
+    <origin xyz="0 0 ${dim_F}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>  <!-- Z: vertical rotation -->
+    <limit lower="${j1_lower}" upper="${j1_upper}" effort="1.5" velocity="1.8"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+
+  <!-- ============================================================ -->
+  <!-- BASE ROTATING LINK                                           -->
+  <!-- The part of the arm that rotates with J1.                   -->
+  <!-- Its origin is at the J1 axis.                               -->
+  <!-- Extends upward to the J2 (shoulder) axis: height = dim_A.  -->
+  <!-- dim_A = PENDING measurement                                 -->
+  <!-- ============================================================ -->
+  <link name="base_rotating_link">
+    <visual>
+      <!-- Visual: column from J1 axis up to J2 axis -->
+      <origin xyz="0 0 ${dim_A / 2.0}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${arm_w} ${arm_d} ${dim_A}"/>
+      </geometry>
+      <material name="v0_dark_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${dim_A / 2.0}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${arm_w} ${arm_d} ${dim_A}"/>
+      </geometry>
+    </collision>
+  </link>
+
+
+  <!-- ============================================================ -->
+  <!-- J2 — SHOULDER JOINT                                          -->
+  <!-- Pitches the upper arm forward/backward.                     -->
+  <!-- Origin at J2 servo shaft center, height A above J1 axis.   -->
+  <!-- dim_A = PENDING measurement                                 -->
+  <!-- Axis: Y  (positive = arm moves forward/down per firmware)   -->
+  <!-- ============================================================ -->
+  <joint name="shoulder_joint" type="revolute">
+    <parent link="base_rotating_link"/>
+    <child  link="upper_arm_link"/>
+    <!--
+      xyz: Z = dim_A (J1 axis → J2 axis height) — PENDING MEASUREMENT
+    -->
+    <origin xyz="0 0 ${dim_A}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>  <!-- Y: pitch axis -->
+    <limit lower="${j2_lower}" upper="${j2_upper}" effort="1.5" velocity="1.8"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+
+  <!-- ============================================================ -->
+  <!-- UPPER ARM LINK                                               -->
+  <!-- Connects shoulder (J2) to elbow (J3).                       -->
+  <!-- Origin at J2 axis. Length = dim_B (~38.9mm from CAD).       -->
+  <!-- dim_B = CAD estimate — verify on physical robot.            -->
+  <!-- ============================================================ -->
+  <link name="upper_arm_link">
+    <visual>
+      <origin xyz="0 0 ${dim_B / 2.0}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${arm_w} ${arm_d} ${dim_B}"/>
+      </geometry>
+      <material name="v0_mid_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${dim_B / 2.0}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${arm_w} ${arm_d} ${dim_B}"/>
+      </geometry>
+    </collision>
+  </link>
+
+
+  <!-- ============================================================ -->
+  <!-- J3 — ELBOW JOINT                                             -->
+  <!-- Bends the forearm relative to the upper arm.                -->
+  <!-- Origin at J3 servo shaft center, distance B from J2 axis.  -->
+  <!-- Axis: Y  (positive = forearm moves forward/down per firmware)-->
+  <!-- ============================================================ -->
+  <joint name="elbow_joint" type="revolute">
+    <parent link="upper_arm_link"/>
+    <child  link="forearm_link"/>
+    <!--
+      xyz: Z = dim_B (J2 axis → J3 axis distance along upper arm)
+      dim_B ≈ 38.9mm from CAD — verify on robot.
+    -->
+    <origin xyz="0 0 ${dim_B}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>  <!-- Y: pitch axis -->
+    <limit lower="${j3_lower}" upper="${j3_upper}" effort="1.5" velocity="1.8"/>
+    <dynamics damping="0.01" friction="0.01"/>
+  </joint>
+
+
+  <!-- ============================================================ -->
+  <!-- FOREARM LINK                                                 -->
+  <!-- Connects elbow (J3) to gripper (J4) reference.             -->
+  <!-- Origin at J3 axis. Length = dim_C.                          -->
+  <!-- dim_C = PENDING measurement                                 -->
+  <!-- ============================================================ -->
+  <link name="forearm_link">
+    <visual>
+      <origin xyz="0 0 ${dim_C / 2.0}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${arm_w} ${arm_d} ${dim_C}"/>
+      </geometry>
+      <material name="v0_orange"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${dim_C / 2.0}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${arm_w} ${arm_d} ${dim_C}"/>
+      </geometry>
+    </collision>
+  </link>
+
+
+  <!-- ============================================================ -->
+  <!-- J4 — GRIPPER JOINT                                           -->
+  <!-- Opens and closes the gripper via the J4 MG90S servo.        -->
+  <!-- This is NOT a positioning DOF — it is the gripper actuator. -->
+  <!-- Origin at J4 servo shaft center, distance C from J3 axis.  -->
+  <!-- dim_C = PENDING measurement                                 -->
+  <!-- ============================================================ -->
+  <joint name="gripper_joint" type="revolute">
+    <parent link="forearm_link"/>
+    <child  link="gripper_link"/>
+    <!--
+      xyz: Z = dim_C (J3 axis → J4/gripper reference) — PENDING MEASUREMENT
+    -->
+    <origin xyz="0 0 ${dim_C}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <!-- negative = closes, positive = opens -->
+    <limit lower="${j4_lower}" upper="${j4_upper}" effort="0.5" velocity="1.5"/>
+    <dynamics damping="0.005" friction="0.005"/>
+  </joint>
+
+
+  <!-- ============================================================ -->
+  <!-- GRIPPER LINK                                                 -->
+  <!-- The gripper servo housing. Bounding box from CAD/STL.       -->
+  <!-- 19.60 × 37.35 × 27.63 mm                                   -->
+  <!-- ============================================================ -->
+  <link name="gripper_link">
+    <visual>
+      <origin xyz="0 0 ${gripper_size_z / 2.0}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${gripper_size_x} ${gripper_size_y} ${gripper_size_z}"/>
+      </geometry>
+      <material name="v0_light_gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${gripper_size_z / 2.0}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${gripper_size_x} ${gripper_size_y} ${gripper_size_z}"/>
+      </geometry>
+    </collision>
+  </link>
+
+
+  <!-- ============================================================ -->
+  <!-- TOOL CENTER POINT (tool0)                                    -->
+  <!-- Virtual frame at the fingertip / grasp center.              -->
+  <!-- This is the end-effector reference for forward/inverse IK.  -->
+  <!-- dim_D = PENDING measurement                                 -->
+  <!-- ============================================================ -->
+  <link name="tool0"/>
+
+  <joint name="tool0_joint" type="fixed">
+    <parent link="gripper_link"/>
+    <child  link="tool0"/>
+    <!--
+      xyz: Z = dim_D (J4/gripper axis → fingertip) — PENDING MEASUREMENT
+    -->
+    <origin xyz="0 0 ${dim_D}" rpy="0 0 0"/>
+  </joint>
+
+
+</robot>

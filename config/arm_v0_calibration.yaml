@@ -1,0 +1,110 @@
+# =============================================================================
+# DEVOTICS ARM V0 — Centralized Calibration & Configuration
+# =============================================================================
+# This is the SINGLE source of truth for all servo calibration parameters.
+#
+# Physical robot:  HomeGenie Robotic Arm V2 Rev 3 (3D-printed)
+# Microcontroller: ESP32 DevKit (Arduino framework, ESP32Servo library)
+# Actuators:       4 × MG90S micro servo motors
+# Communication:   USB Serial, 115200 baud
+#
+# How joint-to-servo conversion works (in arm_v0_serial_node):
+#   servo_deg = servo_home + (direction * ros_rad * 180.0 / pi) + offset_deg
+#   servo_deg = clamp(servo_deg, servo_min, servo_max)
+#
+# direction = +1 → increasing ROS angle → increasing servo degrees
+# direction = -1 → increasing ROS angle → decreasing servo degrees
+# offset_deg = fine-tune calibration trim (start at 0)
+#
+# ROS 0 rad always corresponds to servo_home degrees (= 90° for all joints).
+# =============================================================================
+
+arm_v0_serial_node:
+  ros__parameters:
+
+    # -------------------------------------------------------------------------
+    # Serial port configuration
+    # Can be a physical port: "/dev/ttyUSB0"
+    # Or a TCP forwarder from host Mac: "socket://192.168.64.1:7777"
+    # -------------------------------------------------------------------------
+    serial_port: "socket://192.168.64.1:7777"
+    baud_rate: 115200
+
+    # How long to wait (seconds) for serial port to open before giving up
+    serial_timeout: 2.0
+
+    # -------------------------------------------------------------------------
+    # Joint configuration
+    # -------------------------------------------------------------------------
+    # ROS joint names must match URDF joint names exactly.
+    # servo_id: the label sent in the serial command (e.g. "J1 90\n")
+    # gpio:     ESP32 GPIO pin driving this servo (for documentation only)
+    #
+    # SERVO LIMIT NOTE:
+    #   These software limits mirror the ESP32 firmware limits.
+    #   Do NOT command outside these ranges.
+    #   The node clamps all output to [servo_min, servo_max].
+    # -------------------------------------------------------------------------
+
+    joint_names:
+      - "base_joint"
+      - "shoulder_joint"
+      - "elbow_joint"
+      - "gripper_joint"
+
+    base_joint:
+      servo_id:   "J1"
+      gpio:       25
+      servo_min:  30
+      servo_home: 90
+      servo_max:  150
+      direction:  1
+      offset_deg: 0.0
+
+    shoulder_joint:
+      servo_id:   "J2"
+      gpio:       26
+      servo_min:  60
+      servo_home: 90
+      servo_max:  150
+      direction:  1
+      offset_deg: 0.0
+
+    elbow_joint:
+      servo_id:   "J3"
+      gpio:       14
+      servo_min:  60
+      servo_home: 90
+      servo_max:  150
+      direction:  1
+      offset_deg: 0.0
+
+    gripper_joint:
+      servo_id:   "J4"
+      gpio:       13
+      servo_min:  60
+      servo_home: 90
+      servo_max:  110
+      direction:  1
+      offset_deg: 0.0
+
+    # -------------------------------------------------------------------------
+    # Named gripper positions
+    # Used by the arm commander for OPEN / CLOSE commands.
+    # Adjust gripper_closed_deg experimentally:
+    #   - object held securely
+    #   - servo does NOT continuously buzz or stall
+    #   - printed gripper is not overstressed
+    # -------------------------------------------------------------------------
+    gripper_open_deg:   110    # servo degrees = fully open
+    gripper_closed_deg: 70     # servo degrees = closed on object (tune this!)
+
+    # -------------------------------------------------------------------------
+    # Named home pose (servo degrees for each joint)
+    # Must stay within [servo_min, servo_max] for each joint.
+    # -------------------------------------------------------------------------
+    home_pose:
+      J1: 90
+      J2: 90
+      J3: 90
+      J4: 90
