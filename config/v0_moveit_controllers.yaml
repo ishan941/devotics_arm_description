@@ -1,0 +1,28 @@
+# =============================================================================
+# DEVOTICS ARM V0 — MoveIt Simple Controller Manager Configuration
+# =============================================================================
+# Routes trajectory execution goals from MoveIt to our FollowJointTrajectory
+# action servers.
+# =============================================================================
+moveit_controller_manager: moveit_simple_controller_manager/MoveItSimpleControllerManager
+
+moveit_simple_controller_manager:
+  controller_names:
+    - arm_v0_controller
+    - gripper_v0_controller
+
+  arm_v0_controller:
+    type: FollowJointTrajectory
+    action_ns: follow_joint_trajectory
+    default: true
+    joints:
+      - base_joint
+      - shoulder_joint
+      - elbow_joint
+
+  gripper_v0_controller:
+    type: FollowJointTrajectory
+    action_ns: follow_joint_trajectory
+    default: true
+    joints:
+      - gripper_joint

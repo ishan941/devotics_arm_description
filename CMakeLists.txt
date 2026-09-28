@@ -40,6 +40,7 @@ install(
     scripts/arm_v0_stack_palletizer.py
     scripts/arm_v0_ik_commander.py
     scripts/arm_v0_ik_palletizer.py
+    scripts/arm_v0_moveit_bridge.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
