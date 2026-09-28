@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  =============================================================================
+  DEVOTICS ARM V0 — Semantic Robot Description Format (SRDF)
+  =============================================================================
+  4-DOF desktop arm: 3 arm positioning joints + 1 gripper joint
+  =============================================================================
+-->
+<robot name="devotics_arm_v0">
+
+  <!-- ===================================================================== -->
+  <!-- 1. PLANNING GROUPS                                                    -->
+  <!-- ===================================================================== -->
+
+  <!-- Main arm group: 3 positioning joints (Base J1, Shoulder J2, Elbow J3) -->
+  <group name="arm_v0">
+    <joint name="base_joint"/>
+    <joint name="shoulder_joint"/>
+    <joint name="elbow_joint"/>
+    <chain base_link="base_link" tip_link="forearm_link"/>
+  </group>
+
+  <!-- Gripper actuator group: J4 -->
+  <group name="gripper_v0">
+    <joint name="gripper_joint"/>
+    <link name="gripper_link"/>
+    <link name="tool0"/>
+  </group>
+
+
+  <!-- ===================================================================== -->
+  <!-- 2. END-EFFECTOR                                                       -->
+  <!-- ===================================================================== -->
+  <end_effector name="v0_gripper"
+                parent_link="forearm_link"
+                group="gripper_v0"
+                parent_group="arm_v0"/>
+
+
+  <!-- ===================================================================== -->
+  <!-- 3. NAMED GROUP STATES (PREDEFINED POSES)                              -->
+  <!-- ===================================================================== -->
+
+  <!-- Home: Upright vertical standby (all ROS angles = 0 rad, servos = 90°) -->
+  <group_state name="home" group="arm_v0">
+    <joint name="base_joint"     value="0.0"/>
+    <joint name="shoulder_joint" value="0.0"/>
+    <joint name="elbow_joint"    value="0.0"/>
+  </group_state>
+
+  <!-- Ready: Natural forward-facing ready posture -->
+  <group_state name="ready" group="arm_v0">
+    <joint name="base_joint"     value="0.0"/>
+    <joint name="shoulder_joint" value="0.54"/>
+    <joint name="elbow_joint"    value="0.65"/>
+  </group_state>
+
+  <!-- Pick Ready: Above right pick station (Y = -4.5 cm) -->
+  <group_state name="pick_ready" group="arm_v0">
+    <joint name="base_joint"     value="-0.46"/>
+    <joint name="shoulder_joint" value="0.42"/>
+    <joint name="elbow_joint"    value="1.28"/>
+  </group_state>
+
+  <!-- Place Ready: Above left place station (Y = +4.5 cm) -->
+  <group_state name="place_ready" group="arm_v0">
+    <joint name="base_joint"     value="0.46"/>
+    <joint name="shoulder_joint" value="0.42"/>
+    <joint name="elbow_joint"    value="1.28"/>
+  </group_state>
+
+  <!-- Gripper Named States (radians) -->
+  <group_state name="open" group="gripper_v0">
+    <joint name="gripper_joint" value="0.35"/>  <!-- Servo = 110° -->
+  </group_state>
+
+  <group_state name="close" group="gripper_v0">
+    <joint name="gripper_joint" value="-0.52"/> <!-- Servo = 60° -->
+  </group_state>
+
+
+  <!-- ===================================================================== -->
+  <!-- 4. DISABLE COLLISIONS (ADJACENT & FIXED LINKS)                        -->
+  <!-- Prevents false-positive self-collision alarms for touching links      -->
+  <!-- ===================================================================== -->
+  <disable_collisions link1="base_link"           link2="base_rotating_link" reason="Adjacent"/>
+  <disable_collisions link1="base_rotating_link"  link2="upper_arm_link"     reason="Adjacent"/>
+  <disable_collisions link1="upper_arm_link"      link2="forearm_link"       reason="Adjacent"/>
+  <disable_collisions link1="forearm_link"        link2="gripper_link"       reason="Adjacent"/>
+  <disable_collisions link1="base_link"           link2="upper_arm_link"     reason="Never"/>
+
+</robot>

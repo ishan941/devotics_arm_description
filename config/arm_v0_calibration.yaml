@@ -23,11 +23,9 @@ arm_v0_serial_node:
   ros__parameters:
 
     # -------------------------------------------------------------------------
-    # Serial port configuration
-    # Can be a physical port: "/dev/ttyUSB0"
-    # Or a TCP forwarder from host Mac: "socket://192.168.64.1:7777"
-    # -------------------------------------------------------------------------
-    serial_port: "socket://192.168.64.1:7777"
+    # Serial port configuration:
+    # Wireless connection to ESP32 over Wi-Fi TCP socket:
+    serial_port: "socket://192.168.18.37:8888"
     baud_rate: 115200
 
     # How long to wait (seconds) for serial port to open before giving up
@@ -66,7 +64,7 @@ arm_v0_serial_node:
       gpio:       26
       servo_min:  60
       servo_home: 90
-      servo_max:  150
+      servo_max:  175
       direction:  1
       offset_deg: 0.0
 
@@ -75,7 +73,7 @@ arm_v0_serial_node:
       gpio:       14
       servo_min:  60
       servo_home: 90
-      servo_max:  150
+      servo_max:  175
       direction:  1
       offset_deg: 0.0
 

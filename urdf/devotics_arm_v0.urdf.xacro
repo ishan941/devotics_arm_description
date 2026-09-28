@@ -70,34 +70,29 @@
   <!-- ============================================================ -->
 
   <!--
-    F = table surface → J1 rotation axis  (vertical height, mm)
-    MEASUREMENT PENDING — replace 0.042 with real value
+    F = table surface → J1 rotation axis  (vertical height, 3.0 cm)
   -->
-  <xacro:property name="dim_F"  value="0.042"/>  <!-- PLACEHOLDER: measure F -->
+  <xacro:property name="dim_F"  value="0.030"/>  <!-- Physically verified: 3.0 cm -->
 
   <!--
-    A = J1 rotation axis → J2 (shoulder) axis  (vertical, in rotating base frame)
-    MEASUREMENT PENDING — replace 0.038 with real value
+    A = J1 rotation axis → J2 (shoulder) axis  (vertical, 2.5 cm)
   -->
-  <xacro:property name="dim_A"  value="0.038"/>  <!-- PLACEHOLDER: measure A -->
+  <xacro:property name="dim_A"  value="0.025"/>  <!-- Physically verified: 2.5 cm -->
 
   <!--
-    B = J2 (shoulder) axis → J3 (elbow) axis  (along upper arm)
-    CAD-derived estimate ≈ 38.9 mm — VERIFY ON PHYSICAL ROBOT
+    B = J2 (shoulder) axis → J3 (elbow) axis  (along upper arm, 4.0 cm)
   -->
-  <xacro:property name="dim_B"  value="0.0389"/>  <!-- CAD ~38.9mm: verify B -->
+  <xacro:property name="dim_B"  value="0.040"/>  <!-- Physically verified: 4.0 cm -->
 
   <!--
-    C = J3 (elbow) axis → J4 / gripper reference (along forearm)
-    MEASUREMENT PENDING — replace 0.040 with real value
+    C = J3 (elbow) axis → J4 / gripper reference (along forearm, 4.0 cm)
   -->
-  <xacro:property name="dim_C"  value="0.040"/>  <!-- PLACEHOLDER: measure C -->
+  <xacro:property name="dim_C"  value="0.040"/>  <!-- Physically verified: 4.0 cm -->
 
   <!--
-    D = J4 / gripper axis → fingertip  (gripper effective length)
-    MEASUREMENT PENDING — replace 0.030 with real value
+    D = J4 / gripper axis → fingertip  (gripper effective length, 4.5 cm)
   -->
-  <xacro:property name="dim_D"  value="0.030"/>  <!-- PLACEHOLDER: measure D -->
+  <xacro:property name="dim_D"  value="0.045"/>  <!-- Physically verified: 4.5 cm (Total upright height = 18.0 cm) -->
 
 
   <!-- ============================================================ -->
@@ -112,13 +107,13 @@
   <xacro:property name="j1_lower"  value="${-60.0 * pi / 180.0}"/>
   <xacro:property name="j1_upper"  value="${ 60.0 * pi / 180.0}"/>
 
-  <!-- J2 shoulder: servo 60–150°  → ROS -30° to +60° = -0.524 to +1.047 rad -->
+  <!-- J2 shoulder: servo 60–175°  → ROS -30° to +85° = -0.524 to +1.484 rad -->
   <xacro:property name="j2_lower"  value="${-30.0 * pi / 180.0}"/>
-  <xacro:property name="j2_upper"  value="${ 60.0 * pi / 180.0}"/>
+  <xacro:property name="j2_upper"  value="${ 85.0 * pi / 180.0}"/>
 
-  <!-- J3 elbow:    servo 60–150°  → ROS -30° to +60° = -0.524 to +1.047 rad -->
+  <!-- J3 elbow:    servo 60–175°  → ROS -30° to +85° = -0.524 to +1.484 rad -->
   <xacro:property name="j3_lower"  value="${-30.0 * pi / 180.0}"/>
-  <xacro:property name="j3_upper"  value="${ 60.0 * pi / 180.0}"/>
+  <xacro:property name="j3_upper"  value="${ 85.0 * pi / 180.0}"/>
 
   <!-- J4 gripper:  servo 60–110°  → ROS -30° to +20° = -0.524 to +0.349 rad -->
   <!-- negative = closes (servo < 90°), positive = opens (servo > 90°)        -->

@@ -38,6 +38,8 @@ install(
     scripts/arm_v0_serial_node.py
     scripts/arm_v0_pick_and_place.py
     scripts/arm_v0_stack_palletizer.py
+    scripts/arm_v0_ik_commander.py
+    scripts/arm_v0_ik_palletizer.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
