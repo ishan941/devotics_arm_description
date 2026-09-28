@@ -1,0 +1,25 @@
+DIY Robotic Arm with SG90/MG90 and compatible servo
+https://homegenie.it/mini/1.2/examples/mr-robot
+
+Version 2.0 - Revision 4 (Structural Stability Overhaul)
+- New **Direct 20T Spline-mount Brackets** for base, elbow, and wrist motors:
+    - Eliminates "wobbling" and maximizes stability by allowing direct servo shaft connection (no more horn variations).
+    - Significant structural simplification: **Fewer parts (from 9 to 5)** and reduction of **up to 7 screws** in the arm assembly.
+    - New precision-fit brackets are supplied in a separate file (0.12mm layer height recommended) while legacy brackets are retained in the main file.
+
+Version 2.0 - Revision 3
+- Adapted gripper and brackets to work also with MF90 servos
+- Fixed gripper width to match the arm's body width
+
+Version 2.0 - Revision 2
+- Added horn base cover with screws to tighten and secure the horn base
+- Improved gripper for smoother movements
+
+Version 2.0 - Revision 1
+- Fixed STL models scale
+- Improved gripper housing to prevent gears friction and servo motor overload
+- Added optional FPV camera mount for ESP32-CAM
+
+Version 1.0 - Revision 1 (initial release)
+- 3 axis Robotic Arm with micro servo (e.g. SG90/MG90) 
+
