@@ -162,9 +162,10 @@
   <!-- ============================================================ -->
   <link name="base_link">
     <visual>
-      <origin xyz="0 0 ${base_stl_height / 2.0}" rpy="0 0 0"/>
+      <!-- Real 3D Printed Base Bracket -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="${base_width} ${base_depth} ${base_stl_height}"/>
+        <mesh filename="package://devotics_arm_description/meshes/v0/base/base_bracket.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="v0_dark_gray"/>
     </visual>
@@ -206,10 +207,17 @@
   <!-- ============================================================ -->
   <link name="base_rotating_link">
     <visual>
-      <!-- Visual: column from J1 axis up to J2 axis -->
-      <origin xyz="0 0 ${dim_A / 2.0}" rpy="0 0 0"/>
+      <!-- Rotating Tower Housing -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="${arm_w} ${arm_d} ${dim_A}"/>
+        <mesh filename="package://devotics_arm_description/meshes/v0/base/housing_left.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="v0_dark_blue"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://devotics_arm_description/meshes/v0/base/housing_right.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="v0_dark_blue"/>
     </visual>
@@ -220,6 +228,7 @@
       </geometry>
     </collision>
   </link>
+
 
 
   <!-- ============================================================ -->
@@ -250,9 +259,9 @@
   <!-- ============================================================ -->
   <link name="upper_arm_link">
     <visual>
-      <origin xyz="0 0 ${dim_B / 2.0}" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="${arm_w} ${arm_d} ${dim_B}"/>
+        <mesh filename="package://devotics_arm_description/meshes/v0/arm/bracket_upper_left.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="v0_mid_blue"/>
     </visual>
@@ -263,6 +272,7 @@
       </geometry>
     </collision>
   </link>
+
 
 
   <!-- ============================================================ -->
@@ -293,9 +303,9 @@
   <!-- ============================================================ -->
   <link name="forearm_link">
     <visual>
-      <origin xyz="0 0 ${dim_C / 2.0}" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="${arm_w} ${arm_d} ${dim_C}"/>
+        <mesh filename="package://devotics_arm_description/meshes/v0/arm/bracket_left.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="v0_orange"/>
     </visual>
@@ -306,6 +316,7 @@
       </geometry>
     </collision>
   </link>
+
 
 
   <!-- ============================================================ -->
@@ -336,9 +347,9 @@
   <!-- ============================================================ -->
   <link name="gripper_link">
     <visual>
-      <origin xyz="0 0 ${gripper_size_z / 2.0}" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="${gripper_size_x} ${gripper_size_y} ${gripper_size_z}"/>
+        <mesh filename="package://devotics_arm_description/meshes/v0/gripper/gripper_housing.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="v0_light_gray"/>
     </visual>
@@ -349,6 +360,7 @@
       </geometry>
     </collision>
   </link>
+
 
 
   <!-- ============================================================ -->

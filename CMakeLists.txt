@@ -28,6 +28,7 @@ install(
     urdf
     config
     worlds
+    meshes
   DESTINATION share/${PROJECT_NAME}
 )
 
