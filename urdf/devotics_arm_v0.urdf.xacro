@@ -75,9 +75,9 @@
   <xacro:property name="dim_F"  value="0.030"/>  <!-- Physically verified: 3.0 cm -->
 
   <!--
-    A = J1 rotation axis → J2 (shoulder) axis  (vertical, 2.5 cm)
+    A = J1 rotation axis → J2 (shoulder) axis  (vertical, 6.02 cm to upper housing pivot)
   -->
-  <xacro:property name="dim_A"  value="0.025"/>  <!-- Physically verified: 2.5 cm -->
+  <xacro:property name="dim_A"  value="0.0602"/>  <!-- Matched to CAD housing upper pivot -->
 
   <!--
     B = J2 (shoulder) axis → J3 (elbow) axis  (along upper arm, 4.0 cm)
@@ -160,12 +160,15 @@
   <!-- Origin: table surface, center of base footprint.            -->
   <!-- Visual: CAD bounding box (72.24 × 70.58 × 28.59 mm).       -->
   <!-- ============================================================ -->
+    <!-- ============================================================ -->
+  <!-- BASE LINK                                                    -->
+  <!-- Fixed base that sits on the table surface (Z=0).            -->
+  <!-- ============================================================ -->
   <link name="base_link">
     <visual>
-      <!-- Real 3D Printed Base Bracket -->
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 ${base_stl_height / 2.0}" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://devotics_arm_description/meshes/v0/base/base_bracket.stl" scale="0.001 0.001 0.001"/>
+        <box size="${base_width} ${base_depth} ${base_stl_height}"/>
       </geometry>
       <material name="v0_dark_gray"/>
     </visual>
@@ -180,19 +183,12 @@
 
   <!-- ============================================================ -->
   <!-- J1 — BASE ROTATION JOINT                                     -->
-  <!-- Rotates the entire arm around the vertical (Z) axis.         -->
-  <!-- Origin at J1 servo shaft center, height F above table.      -->
-  <!-- dim_F = PENDING measurement                                  -->
   <!-- ============================================================ -->
   <joint name="base_joint" type="revolute">
     <parent link="base_link"/>
     <child  link="base_rotating_link"/>
-    <!--
-      xyz: Z = dim_F (table → J1 axis height) — PENDING MEASUREMENT
-      Once F is measured, update dim_F above.
-    -->
     <origin xyz="0 0 ${dim_F}" rpy="0 0 0"/>
-    <axis xyz="0 0 1"/>  <!-- Z: vertical rotation -->
+    <axis xyz="0 0 1"/>
     <limit lower="${j1_lower}" upper="${j1_upper}" effort="1.5" velocity="1.8"/>
     <dynamics damping="0.01" friction="0.01"/>
   </joint>
@@ -200,26 +196,63 @@
 
   <!-- ============================================================ -->
   <!-- BASE ROTATING LINK                                           -->
-  <!-- The part of the arm that rotates with J1.                   -->
-  <!-- Its origin is at the J1 axis.                               -->
-  <!-- Extends upward to the J2 (shoulder) axis: height = dim_A.  -->
-  <!-- dim_A = PENDING measurement                                 -->
   <!-- ============================================================ -->
   <link name="base_rotating_link">
+    <!-- Servo horn mounting plate at base (flat on base platform) -->
     <visual>
-      <!-- Rotating Tower Housing -->
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0.05828 0 -0.04365" rpy="0 0 -1.5708"/>
+      <geometry>
+        <mesh filename="package://devotics_arm_description/meshes/v0/base/horn_base.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="v0_dark_gray"/>
+    </visual>
+    <!-- Left housing upright (100% vertical along +Z, seated flush on base) -->
+    <visual>
+      <origin xyz="0.08918 0 0.00592" rpy="0.7944 0 -1.5708"/>
       <geometry>
         <mesh filename="package://devotics_arm_description/meshes/v0/base/housing_left.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="v0_dark_blue"/>
     </visual>
+    <!-- Right housing upright (100% vertical along +Z, seated flush on base) -->
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0.08918 0 0.00592" rpy="0.7944 0 -1.5708"/>
       <geometry>
         <mesh filename="package://devotics_arm_description/meshes/v0/base/housing_right.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="v0_dark_blue"/>
+    </visual>
+    <!-- Lower Left Bracket (exact CAD assembly match) -->
+    <visual>
+      <origin xyz="0.08918 0 0.00592" rpy="0.7944 0 -1.5708"/>
+      <geometry>
+        <mesh filename="package://devotics_arm_description/meshes/v0/arm/bracket_lower_left.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="v0_light_gray"/>
+    </visual>
+    <!-- Lower Right Bracket (exact CAD assembly match) -->
+    <visual>
+      <origin xyz="0.08918 0 0.00592" rpy="0.7944 0 -1.5708"/>
+      <geometry>
+        <mesh filename="package://devotics_arm_description/meshes/v0/arm/bracket_lower_right.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="v0_light_gray"/>
+    </visual>
+    <!-- Upper Left Bracket (exact CAD assembly match) -->
+    <visual>
+      <origin xyz="0.08918 0 0.00592" rpy="0.7944 0 -1.5708"/>
+      <geometry>
+        <mesh filename="package://devotics_arm_description/meshes/v0/arm/bracket_upper_left.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="v0_light_gray"/>
+    </visual>
+    <!-- Upper Right Bracket (exact CAD assembly match) -->
+    <visual>
+      <origin xyz="0.08918 0 0.00592" rpy="0.7944 0 -1.5708"/>
+      <geometry>
+        <mesh filename="package://devotics_arm_description/meshes/v0/arm/bracket_upper_right.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="v0_light_gray"/>
     </visual>
     <collision>
       <origin xyz="0 0 ${dim_A / 2.0}" rpy="0 0 0"/>
@@ -230,22 +263,14 @@
   </link>
 
 
-
   <!-- ============================================================ -->
   <!-- J2 — SHOULDER JOINT                                          -->
-  <!-- Pitches the upper arm forward/backward.                     -->
-  <!-- Origin at J2 servo shaft center, height A above J1 axis.   -->
-  <!-- dim_A = PENDING measurement                                 -->
-  <!-- Axis: Y  (positive = arm moves forward/down per firmware)   -->
   <!-- ============================================================ -->
   <joint name="shoulder_joint" type="revolute">
     <parent link="base_rotating_link"/>
     <child  link="upper_arm_link"/>
-    <!--
-      xyz: Z = dim_A (J1 axis → J2 axis height) — PENDING MEASUREMENT
-    -->
     <origin xyz="0 0 ${dim_A}" rpy="0 0 0"/>
-    <axis xyz="0 1 0"/>  <!-- Y: pitch axis -->
+    <axis xyz="0 1 0"/>
     <limit lower="${j2_lower}" upper="${j2_upper}" effort="1.5" velocity="1.8"/>
     <dynamics damping="0.01" friction="0.01"/>
   </joint>
@@ -253,15 +278,12 @@
 
   <!-- ============================================================ -->
   <!-- UPPER ARM LINK                                               -->
-  <!-- Connects shoulder (J2) to elbow (J3).                       -->
-  <!-- Origin at J2 axis. Length = dim_B (~38.9mm from CAD).       -->
-  <!-- dim_B = CAD estimate — verify on physical robot.            -->
   <!-- ============================================================ -->
   <link name="upper_arm_link">
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 ${dim_B / 2.0}" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://devotics_arm_description/meshes/v0/arm/bracket_upper_left.stl" scale="0.001 0.001 0.001"/>
+        <box size="${arm_w} ${arm_d} ${dim_B}"/>
       </geometry>
       <material name="v0_mid_blue"/>
     </visual>
@@ -274,22 +296,14 @@
   </link>
 
 
-
   <!-- ============================================================ -->
   <!-- J3 — ELBOW JOINT                                             -->
-  <!-- Bends the forearm relative to the upper arm.                -->
-  <!-- Origin at J3 servo shaft center, distance B from J2 axis.  -->
-  <!-- Axis: Y  (positive = forearm moves forward/down per firmware)-->
   <!-- ============================================================ -->
   <joint name="elbow_joint" type="revolute">
     <parent link="upper_arm_link"/>
     <child  link="forearm_link"/>
-    <!--
-      xyz: Z = dim_B (J2 axis → J3 axis distance along upper arm)
-      dim_B ≈ 38.9mm from CAD — verify on robot.
-    -->
     <origin xyz="0 0 ${dim_B}" rpy="0 0 0"/>
-    <axis xyz="0 1 0"/>  <!-- Y: pitch axis -->
+    <axis xyz="0 1 0"/>
     <limit lower="${j3_lower}" upper="${j3_upper}" effort="1.5" velocity="1.8"/>
     <dynamics damping="0.01" friction="0.01"/>
   </joint>
@@ -297,15 +311,12 @@
 
   <!-- ============================================================ -->
   <!-- FOREARM LINK                                                 -->
-  <!-- Connects elbow (J3) to gripper (J4) reference.             -->
-  <!-- Origin at J3 axis. Length = dim_C.                          -->
-  <!-- dim_C = PENDING measurement                                 -->
   <!-- ============================================================ -->
   <link name="forearm_link">
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 ${dim_C / 2.0}" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://devotics_arm_description/meshes/v0/arm/bracket_left.stl" scale="0.001 0.001 0.001"/>
+        <box size="${arm_w} ${arm_d} ${dim_C}"/>
       </geometry>
       <material name="v0_orange"/>
     </visual>
@@ -318,23 +329,14 @@
   </link>
 
 
-
   <!-- ============================================================ -->
   <!-- J4 — GRIPPER JOINT                                           -->
-  <!-- Opens and closes the gripper via the J4 MG90S servo.        -->
-  <!-- This is NOT a positioning DOF — it is the gripper actuator. -->
-  <!-- Origin at J4 servo shaft center, distance C from J3 axis.  -->
-  <!-- dim_C = PENDING measurement                                 -->
   <!-- ============================================================ -->
   <joint name="gripper_joint" type="revolute">
     <parent link="forearm_link"/>
     <child  link="gripper_link"/>
-    <!--
-      xyz: Z = dim_C (J3 axis → J4/gripper reference) — PENDING MEASUREMENT
-    -->
     <origin xyz="0 0 ${dim_C}" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <!-- negative = closes, positive = opens -->
     <limit lower="${j4_lower}" upper="${j4_upper}" effort="0.5" velocity="1.5"/>
     <dynamics damping="0.005" friction="0.005"/>
   </joint>
@@ -342,14 +344,12 @@
 
   <!-- ============================================================ -->
   <!-- GRIPPER LINK                                                 -->
-  <!-- The gripper servo housing. Bounding box from CAD/STL.       -->
-  <!-- 19.60 × 37.35 × 27.63 mm                                   -->
   <!-- ============================================================ -->
   <link name="gripper_link">
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 ${gripper_size_z / 2.0}" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://devotics_arm_description/meshes/v0/gripper/gripper_housing.stl" scale="0.001 0.001 0.001"/>
+        <box size="${gripper_size_x} ${gripper_size_y} ${gripper_size_z}"/>
       </geometry>
       <material name="v0_light_gray"/>
     </visual>
@@ -362,23 +362,15 @@
   </link>
 
 
-
   <!-- ============================================================ -->
   <!-- TOOL CENTER POINT (tool0)                                    -->
-  <!-- Virtual frame at the fingertip / grasp center.              -->
-  <!-- This is the end-effector reference for forward/inverse IK.  -->
-  <!-- dim_D = PENDING measurement                                 -->
   <!-- ============================================================ -->
   <link name="tool0"/>
 
   <joint name="tool0_joint" type="fixed">
     <parent link="gripper_link"/>
     <child  link="tool0"/>
-    <!--
-      xyz: Z = dim_D (J4/gripper axis → fingertip) — PENDING MEASUREMENT
-    -->
     <origin xyz="0 0 ${dim_D}" rpy="0 0 0"/>
   </joint>
-
 
 </robot>
